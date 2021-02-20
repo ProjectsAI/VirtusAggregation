@@ -1,0 +1,82 @@
+2020-11-13 19:43:04,987 INFO: Microblog startup [in /Users/alessandrofranca/Downloads/microblog-0.15/app/__init__.py:74]
+2020-11-17 17:59:40,761 INFO: Microblog startup [in /Users/alessandrofranca/Downloads/microblog-0.15/app/__init__.py:74]
+2020-11-23 17:10:23,244 INFO: Microblog startup [in /Users/alessandrofranca/Downloads/microblog-0.15/app/__init__.py:74]
+2020-11-24 17:42:10,309 INFO: Microblog startup [in /Users/alessandrofranca/Downloads/microblog-0.15/app/__init__.py:82]
+2020-12-11 15:14:59,420 INFO: Microblog startup [in /Users/alessandrofranca/Downloads/microblog-0.15/app/__init__.py:82]
+2020-12-15 15:58:32,764 INFO: Microblog startup [in /Users/alessandrofranca/Downloads/microblog-0.15/app/__init__.py:82]
+2021-01-12 17:45:57,088 INFO: Microblog startup [in /Users/alessandrofranca/Downloads/microblog-0.15/app/__init__.py:82]
+2021-02-10 12:34:44,043 INFO: Microblog startup [in /Users/alessandrofranca/PycharmProjects/optimizer_flaskwebapp_v1/app/__init__.py:82]
+2021-02-19 19:43:49,295 INFO: Microblog startup [in /Users/alessandrofranca/PycharmProjects/VirtusAggregation/webappOptimizer/app/__init__.py:82]
+2021-02-19 19:44:01,522 ERROR: Exception on /webapp/third_step [POST] [in /Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/flask/app.py:1758]
+Traceback (most recent call last):
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 598, in urlopen
+    httplib_response = self._make_request(conn, method, url,
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/http/client.py", line 1347, in getresponse
+    response.begin()
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/http/client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/http/client.py", line 276, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/requests/adapters.py", line 430, in send
+    resp = conn.urlopen(
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 638, in urlopen
+    retries = retries.increment(method, url, error=e, _pool=self,
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/packages/six.py", line 685, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 598, in urlopen
+    httplib_response = self._make_request(conn, method, url,
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/http/client.py", line 1347, in getresponse
+    response.begin()
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/http/client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/http/client.py", line 276, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+urllib3.exceptions.ProtocolError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/flask_login/utils.py", line 228, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/alessandrofranca/PycharmProjects/VirtusAggregation/webappOptimizer/app/main/routes.py", line 143, in third_step
+    response = requests.post('http://0.0.0.0:4996/api/aggregate', json=json.dumps(to_aggregate))
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/requests/api.py", line 112, in post
+    return request('post', url, data=data, json=json, **kwargs)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/alessandrofranca/opt/anaconda3/envs/EnergyManagementEnv/lib/python3.8/site-packages/requests/adapters.py", line 490, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))

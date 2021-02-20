@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block jumbotron_content %}
+    <div class="jumbotron" style="size: auto">
+        <h3>{{ _('Step 1:', username=current_user.username) }}</h3>
+        <p class="lead">Setup your Configuration!</p>
+    </div>
+{% endblock %}
+
+{% block app_content %}
+    <div class="container">
+        <div class="dropdown">
+          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            Saved Configurations
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+          </ul>
+        </div>
+
+        <form method="POST" action="{{ url_for('main.save_config') }}">
+        {{ form.hidden_tag() }}
+            {{ form.body.hidden_tag() }}
+            {% for field in form.body %}
+                {% if field.widget.input_type != 'hidden' %}
+                <div class="row">
+                    {% if field.type == 'IntegerRangeField' %}
+                    <p>
+                            <div class="col-md-1">
+                                <b>{{ field.label }}</b>
+                            </div>
+                            <div class="col-md-2">
+                                {{ field(min=0, max=10, step=1, class="border-0", oninput="javascript:valueSpanUpdate(id, value)")}}
+                            </div>
+                            <div class="col-md-2">
+                                <span class="font-weight-bold text-primary ml-2 mt-1" id="value{{ field.id }}">{{ field.data }}</span>
+                            </div>
+                    </p>
+                    {% endif %}
+                    {% if field.type == 'StringField' %}
+                        <div class="col-md-1">
+                        </div>
+                        <div class="col-md-4">
+                            {{ field.data }}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+                <p>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="example-date-input" class="col-2 col-form-label">Enter Date</label>
+                            {{ form.date(class="form-control", required=true) }}
+                        </div>
+                    </div>
+                </p>
+                <br>
+                <p>
+                    <div class="row">
+                        <div class="col-md-2">
+                            {{ form.remember_conf(onchange="javascript:hideConfname(form.confname.id, checked)") }}
+                            {{ form.remember_conf.label }}
+                        </div>
+                    </div>
+                </p>
+                <p>
+                    <div class="row">
+                        <div class="col-md-2">
+                            {{ form.confname(hidden=True, placeholder='Configuration Name') }}
+                        </div>
+                    </div>
+                </p>
+                <p>
+                    <div class="row">
+                            <ul class="list-inline pull-right">
+                                <li>{{ form.submit(class="btn btn-primary btn-info-full next-step", value="Save and continue") }}</li>
+                            </ul>
+                    </div>
+                </p>
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block prevnext %}
+    <div>
+    <br>
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="next {% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url  }}">
+                    {{ _('Save and continue') }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    </div>
+{% endblock %}

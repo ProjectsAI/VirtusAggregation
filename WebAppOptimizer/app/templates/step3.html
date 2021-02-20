@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block jumbotron_content %}
+    <div class="jumbotron" style="size: auto">
+        <h3>{{ _('Step 3:', username=current_user.username) }}</h3>
+        <p class="lead"></p>
+        <p class="lead"> 1. Run local optimizations where necessary</p>
+        <p class="lead">2. Show Flexibility</p>
+    </div>
+{% endblock %}
+
+{% block app_content %}
+    <div class="container">
+
+        <form method="POST">
+        {{ form.hidden_tag() }}
+            <div class="row">
+                <p>
+                    <div class="col-md-2">
+                        {{ form.submit1(class="btn btn-default get-local-optimization", value="Resolve Pods", onclick="$('#loading').show();") }}
+                    </div>
+                </p>
+            </div>
+            <div class ="row" id="loading" style="display:none;">
+                <img src="loading.gif" alt="Loading!" />
+            </div>
+             <p>
+                <div class="md-form mb-4 pink-textarea active-pink-textarea">
+                    <i class="fas fa-angle-double-right prefix"></i>
+                       {{ form.textarea(class="md-textarea form-control",readonly=true, hidden=true, rows="10") }}
+                    </div>
+                </p>
+            <br>
+            <div class="row">
+                <p>
+                    <div class="col-md-2">
+                        {{ form.submit2(class="btn btn-default get-aggregation", value="Show Flexibility", onclick="$('#loading2').show();") }}
+                    </div>
+                </p>
+            </div>
+            <div id="loading2" style="display:none;">
+                <img src="loading.gif" alt="Loading!" />
+            </div>
+            <br>
+            {% for img in images %}
+                <img src="{{ img }}"/>
+            {% endfor %}
+        </form>
+        <div class="row">
+            <ul class="list-inline pull-right">
+                <li><a href={{ prev_url }}><button type="button" class="btn btn-default prev-step">Previous</button></a></li>
+                <li><a href={{ next_url }}><button type="button" class="btn btn-primary btn-info-full next-step {% if not next_url %} disabled{% endif %}">Save and continue</button></a></li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+        <form method="POST" action="{{ url_for('main.save_config') }}">
+        {{ form.hidden_tag() }}
+            {{ form.body.hidden_tag() }}
+            {% for field in form.body %}
+                {% if field.widget.input_type != 'hidden' %}
+                <div class="row">
+                    <p>
+                        <div class="col-md-1">
+                            <b>{{ field.label }}</b>
+                        </div>
+                        <div class="col-md-2">
+                            {{ field(min=0, max=10, step=1, class="border-0", oninput="javascript:valueSpanUpdate(id, value)")}}
+                        </div>
+                        <div class="col-md-2">
+                            <span class="font-weight-bold text-primary ml-2 mt-1" id="value{{ field.id }}">{{ field.data }}</span>
+                        </div>
+                    </p>
+                </div>
+                {% endif %}
+            {% endfor %}
+                <p>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="example-date-input" class="col-2 col-form-label">Enter Date</label>
+                            {{ form.date(class="form-control", required=true) }}
+                        </div>
+                    </div>
+                </p>
+                <br>
+                <p>
+                    <div class="row">
+                        <div class="col-md-2">
+                            {{ form.remember_conf(onchange="javascript:hideConfname(form.confname.id, checked)") }}
+                            {{ form.remember_conf.label }}
+                        </div>
+                    </div>
+                </p>
+                <p>
+                    <div class="row">
+                        <div class="col-md-2">
+                            {{ form.confname(hidden=True, placeholder='Configuration Name') }}
+                        </div>
+                    </div>
+                </p>
+                <p>
+                    <div class="row">
+                            <ul class="list-inline pull-right">
+                                <li>{{ form.submit(class="btn btn-primary btn-info-full next-step", value="Save and continue") }}</li>
+                            </ul>
+                    </div>
+                </p>
+        </form>
