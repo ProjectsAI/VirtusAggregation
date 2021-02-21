@@ -38,17 +38,19 @@ class Solver:
 
     def __setup_result_variable(self):
         result_var = {
-            'BASELINE': [0 for _ in range(self.data['n_timestamps'])],
-            'MAX_BOUND': [0 for _ in range(self.data['n_timestamps'])],
-            'MIN_BOUND': [0 for _ in range(self.data['n_timestamps'])],
+            'Old_f_max': [sum(col) for col in zip(*self.__input_data['maximized']['flexibilities'])],
+            'Old_f_min': [sum(col) for col in zip(*self.__input_data['minimized']['flexibilities'])],
+            'baseline': self.baseline,
 
-            'GAIN_MAX': [0 for _ in range(self.data['n_timestamps'])],
-            'GAIN_MIN': [0 for _ in range(self.data['n_timestamps'])],
+            'F_max': [0 for _ in range(self.data['n_timestamps'])],
+            'F_min': [0 for _ in range(self.data['n_timestamps'])],
+            'Gain_max': [0 for _ in range(self.data['n_timestamps'])],
+            'Gain_min': [0 for _ in range(self.data['n_timestamps'])],
 
             'solution_value': None,  # For the solution value
             'time': None,
         }
-        # print(result_var['MAX_BOUND'])
+        # print(result_var['F_max'])
         self.results = {
             'minimized': copy.deepcopy(result_var),
             'maximized': copy.deepcopy(result_var)
@@ -182,21 +184,18 @@ class Solver:
             for v in instance.component_objects(Var, active=True):
                 # print ("Variable",v)
                 varobject = getattr(instance, str(v))
-                if v.name == 'BASELINE':
+                if v.name == 'F_max':
                     for index in varobject:
-                        self.results[model_resolve_method]['BASELINE'][index] = varobject[index].value
-                if v.name == 'MAX_BOUND':
+                        self.results[model_resolve_method]['F_max'][index] = varobject[index].value
+                if v.name == 'F_min':
                     for index in varobject:
-                        self.results[model_resolve_method]['MAX_BOUND'][index] = varobject[index].value
-                if v.name == 'MIN_BOUND':
+                        self.results[model_resolve_method]['F_min'][index] = varobject[index].value
+                if v.name == 'Gain_max':
                     for index in varobject:
-                        self.results[model_resolve_method]['MIN_BOUND'][index] = varobject[index].value
-                if v.name == 'GAIN_MAX':
+                        self.results[model_resolve_method]['Gain_max'][index] = varobject[index].value
+                if v.name == 'Gain_min':
                     for index in varobject:
-                        self.results[model_resolve_method]['GAIN_MAX'][index] = varobject[index].value
-                if v.name == 'GAIN_MIN':
-                    for index in varobject:
-                        self.results[model_resolve_method]['GAIN_MIN'][index] = varobject[index].value
+                        self.results[model_resolve_method]['Gain_min'][index] = varobject[index].value
 
             for v in instance.component_objects(Objective, active=True):
                 self.results[model_resolve_method]['solution_value'] = v.expr()

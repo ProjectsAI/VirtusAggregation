@@ -21,20 +21,17 @@ class Model:
         self.model.N = pyo.RangeSet(0, self.model.n_pods - 1)  # 0..n - 1
 
     def __setup_vars(self):
-        # useful for plotting
-        self.model.BASELINE = pyo.Var(self.model.T, domain=pyo.Reals)
-
         # Max flexibility
-        self.model.MAX_BOUND = pyo.Var(self.model.T, domain=pyo.Reals)
+        self.model.F_max = pyo.Var(self.model.T, domain=pyo.Reals)
 
         # Min flexibility
-        self.model.MIN_BOUND = pyo.Var(self.model.T, domain=pyo.Reals)
+        self.model.F_min = pyo.Var(self.model.T, domain=pyo.Reals)
 
         # Gain
         self.model.G_in = pyo.Var(self.model.T, domain=pyo.Reals)
         self.model.G_out = pyo.Var(self.model.T, domain=pyo.Reals)
-        self.model.GAIN_MAX = pyo.Var(self.model.T, domain=pyo.Reals)
-        self.model.GAIN_MIN = pyo.Var(self.model.T, domain=pyo.Reals)
+        self.model.Gain_max = pyo.Var(self.model.T, domain=pyo.Reals)
+        self.model.Gain_min = pyo.Var(self.model.T, domain=pyo.Reals)
 
     def __setup_parameters(self):
         # Sum of Pod baselines
@@ -58,48 +55,37 @@ class Model:
     def __setup_constraints(self):
         ##############################################################################################
         #
-        #   Vars needed for plotting bounds
+        #   F_max
         #
         ##############################################################################################
-        # init BASELINE value
-        def baseline_value(m, t):
-            return (m.baseline[t], m.BASELINE[t], m.baseline[t])
+        # F_max lb
+        def F_max_lb(m, t):
+            return m.F_max[t] >= m.baseline[t]
 
-        self.model.baseline_value = pyo.Constraint(self.model.T, rule=baseline_value)
+        self.model.F_max_lb = pyo.Constraint(self.model.T, rule=F_max_lb)
 
-        ##############################################################################################
-        #
-        #   MAX_BOUND
-        #
-        ##############################################################################################
-        # MAX_BOUND lb
-        def max_bound_lb(m, t):
-            return m.MAX_BOUND[t] >= m.baseline[t]
+        # F_max ub
+        def F_max_ub(m, t):
+            return m.F_max[t] <= sum(m.pod_max_flex[n, t] for n in m.N)
 
-        self.model.max_bound_lb = pyo.Constraint(self.model.T, rule=max_bound_lb)
-
-        # MAX_BOUND ub
-        def max_bound_ub(m, t):
-            return m.MAX_BOUND[t] <= sum(m.pod_max_flex[n, t] for n in m.N)
-
-        self.model.max_bound_ub = pyo.Constraint(self.model.T, rule=max_bound_ub)
+        self.model.F_max_ub = pyo.Constraint(self.model.T, rule=F_max_ub)
 
         ##############################################################################################
         #
-        #   MIN_BOUND
+        #   F_min
         #
         ##############################################################################################
-        # MIN_BOUND lb
-        def min_bound_lb(m, t):
-            return m.MIN_BOUND[t] >= sum(m.pod_min_flex[n, t] for n in m.N)
+        # F_min lb
+        def F_min_lb(m, t):
+            return m.F_min[t] >= sum(m.pod_min_flex[n, t] for n in m.N)
 
-        self.model.min_bound_lb = pyo.Constraint(self.model.T, rule=min_bound_lb)
+        self.model.F_min_lb = pyo.Constraint(self.model.T, rule=F_min_lb)
 
-        # MIN_BOUND ub
-        def min_bound_ub(m, t):
-            return m.MIN_BOUND[t] <= m.baseline[t]
+        # F_min ub
+        def F_min_ub(m, t):
+            return m.F_min[t] <= m.baseline[t]
 
-        self.model.min_bound_ub = pyo.Constraint(self.model.T, rule=min_bound_ub)
+        self.model.F_min_ub = pyo.Constraint(self.model.T, rule=F_min_ub)
 
 
         ##############################################################################################
@@ -107,13 +93,13 @@ class Model:
         #   G_in / G_out value
         #
         ##############################################################################################
-        # G_in lb
+        # Gain_in
         def G_in_value(m, t):
             return m.G_in[t] == m.c_p[t] - m.c_in[t]
 
         self.model.G_in_value = pyo.Constraint(self.model.T, rule=G_in_value)
 
-        # G_out ub
+        # Gain_out
         def G_out_value(m, t):
             return m.G_out[t] == m.c_out[t] - m.c_p[t]
 
@@ -124,24 +110,24 @@ class Model:
         #   GAIN
         #
         ##############################################################################################
-        def GAIN_MAX_rule(m, t):
-            return m.GAIN_MAX[t] == (m.G_in[t] * m.max_can_buy[t] - m.G_out[t] * m.max_can_sell[t])
+        def gain_max_rule(m, t):
+            return m.Gain_max[t] == (m.G_in[t] * m.max_can_buy[t] - m.G_out[t] * m.max_can_sell[t])
 
-        self.model.GAIN_MAX_rule = pyo.Constraint(self.model.T, rule=GAIN_MAX_rule)
+        self.model.gain_max_rule = pyo.Constraint(self.model.T, rule=gain_max_rule)
 
-        def GAIN_MIN_rule(m, t):
-            return m.GAIN_MIN[t] == (m.G_in[t] * m.min_can_buy[t] - m.G_out[t] * m.min_can_sell[t])
+        def gain_min_rule(m, t):
+            return m.Gain_min[t] == (m.G_in[t] * m.min_can_buy[t] - m.G_out[t] * m.min_can_sell[t])
 
-        self.model.GAIN_MIN_rule = pyo.Constraint(self.model.T, rule=GAIN_MIN_rule)
+        self.model.gain_min_rule = pyo.Constraint(self.model.T, rule=gain_min_rule)
 
     def __setup_objective(self):
         def objective_function_minimize(m):
-            return sum(m.GAIN_MAX[t] * m.MAX_BOUND[t] + m.GAIN_MIN[t] * m.MIN_BOUND[t] for t in m.T)
+            return sum(m.Gain_max[t] * m.F_max[t] + m.Gain_min[t] * m.F_min[t] for t in m.T)
 
         self.model.objective_function_minimize = pyo.Objective(sense=pyo.minimize, rule=objective_function_minimize)
 
         def objective_function_maximize(m):
-            return sum(m.GAIN_MAX[t] * (m.MAX_BOUND[t]) + m.GAIN_MIN[t] * (m.MIN_BOUND[t]) for t in m.T)
+            return sum(m.Gain_max[t] * m.F_max[t] + m.Gain_min[t] * m.F_min[t] for t in m.T)
 
         self.model.objective_function_maximize = pyo.Objective(sense=pyo.maximize, rule=objective_function_maximize)
 

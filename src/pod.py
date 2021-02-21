@@ -32,12 +32,15 @@ class Pod(object):
 
     def get_composition(self):
         lst = []
+        tmp = []
         res = '['
         for p in self.profiles:
-            lst.append(p.profile_type.value) if p.profile_type.value not in lst else lst
+            lst.append(p.profile_type.value)  # if p.profile_type.value not in lst else lst
 
         for p in self.profiles:
-            res += ' ' + str(lst.count(p.profile_type.value)) + ' ' + p.profile_type.value + ','
+            if p.profile_type.value not in tmp:
+                tmp.append(p.profile_type.value)
+                res += ' ' + str(lst.count(p.profile_type.value)) + ' ' + p.profile_type.value + ','
         res = res[:len(res) - 1]
         res += ' ]'
         return res

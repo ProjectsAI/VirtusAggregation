@@ -31,7 +31,7 @@ def get_baselines_from_config():
     if request.method == 'GET':
         config = json.loads(request.get_json())
         plants = {'data': [],
-                  'date': '2020-11-01'  # config['date']
+                  'date': '2020-11-05'  # config['date']
                   }
 
         for x in config['plants']:

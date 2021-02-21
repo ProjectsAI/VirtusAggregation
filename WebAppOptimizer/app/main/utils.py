@@ -1,4 +1,3 @@
-from collections import namedtuple
 from operator import itemgetter
 import matplotlib
 import matplotlib.pyplot as plt
@@ -6,7 +5,8 @@ import io
 import base64
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from tabulate import tabulate
+
+from WebAppOptimizer.app.main.forms import OptimizationResultForm, GetFromLibraResultForm
 
 matplotlib.use('Agg')
 
@@ -15,19 +15,76 @@ plants = ['PONTLAB_1', 'PONTLAB_2', 'PV_1', "PV_2", "WIND_1", "WIND_2", 'BESS_1'
 
 
 ##########################   UTILS   ##################################
-def get_selected_config(configuration, data):
-    res = {'plants': []}
-    for item in data:
-        tmp = item
-        if configuration.body[item['name']] != 0:
-            tmp['quantity'] = configuration.body[item['name']]
-            res['plants'].append(tmp)
-
-    res.update({'date': str(configuration.datetime)})
-    return res
 
 
-def render_data(data):
+def plot_results(result, resolve_method='maximized'):
+    fig1, ax = plt.subplots(figsize=(8, 4))
+    ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility')
+    plt.xticks(range(0, 96, 5))
+
+    ax.plot(result[resolve_method]['Old_f_max'], label='Flexibility Upper Bound', color='#ff7f0e')
+    ax.plot(result[resolve_method]['Old_f_min'], label='Flexibility Lower Bound', color='#1f77b4')
+    ax.plot(result[resolve_method]['baseline'], label='Baseline', color='#bcbd22', linewidth=1)
+    plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+
+    fig2, ax = plt.subplots(figsize=(8, 4))
+    ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility Optimized')
+    plt.xticks(range(0, 96, 5))
+
+    ax.plot(result[resolve_method]['F_max'], label='Optimized Flexibility UB', color='#ff7f0e')
+    ax.plot(result[resolve_method]['F_min'], label='Optimized Flexibility LB', color='#1f77b4')
+    ax.plot(result[resolve_method]['baseline'], label='Baseline', color='#bcbd22', linewidth=1)
+    plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+
+    fig3, ax = plt.subplots(figsize=(8, 4))
+    ax.set(xlabel='Time', ylabel='Cost (€)', title='Total Profit')
+    plt.xticks(range(0, 96, 5))
+
+    # ax.plot(result[resolve_method]['Gain_max'], label='Gain_max (' + resolve_method + ')')
+    # ax.plot(result[resolve_method]['Gain_min'], label='Gain_min (' + resolve_method + ')')
+    min_gain = [x * y for x, y in zip(result[resolve_method]['Gain_min'], result[resolve_method]['F_min'])]
+    max_gain = [x * y for x, y in zip(result[resolve_method]['Gain_max'], result[resolve_method]['F_max'])]
+    ax.plot([(x + y) / 2 for x, y in zip(min_gain, max_gain)],
+            label='Mean Profit')
+    plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+
+    # Convert plot to PNG image
+    pngImage1 = io.BytesIO()
+    FigureCanvas(fig1).print_png(pngImage1)
+    pngImage2 = io.BytesIO()
+    FigureCanvas(fig2).print_png(pngImage2)
+    pngImage3 = io.BytesIO()
+    FigureCanvas(fig3).print_png(pngImage3)
+
+    # Encode PNG image to base64 string
+    pngImageB64String1 = "data:image/png;base64,"
+    pngImageB64String1 += base64.b64encode(pngImage1.getvalue()).decode('utf8')
+    pngImageB64String2 = "data:image/png;base64,"
+    pngImageB64String2 += base64.b64encode(pngImage2.getvalue()).decode('utf8')
+    pngImageB64String3 = "data:image/png;base64,"
+    pngImageB64String3 += base64.b64encode(pngImage3.getvalue()).decode('utf8')
+
+    return pngImageB64String1, pngImageB64String2, pngImageB64String3
+
+
+def render_get_from_libra(form, data):
+    form.table_title.data = 'Date:\t' + data['date']
+
+    for e in data['plants']:
+        row = GetFromLibraResultForm()
+        row.profile_id = e['id']
+        row.profile_name = e['name']
+        row.profile_description = e['description']
+        is_ok = True
+        for subel in e['subplants']:
+            if subel['type'] != 'SIMPLE_STORAGE':
+                is_ok *= True if subel['baseline'] is not None else False
+        row.profile = '✓' if is_ok else 'X'
+
+        form.rows.append_entry(row)
+
+
+def render_data_old(data):
     res = 'Date: ' + data['date'] + '\n\n'
 
     for element in data['plants']:
@@ -41,6 +98,18 @@ def render_data(data):
                    '\tBaseline: {}\n'.format(sub_element['id'], sub_element['name'], sub_element['baseline'])
         res += '\n\n'
 
+    return res
+
+
+def get_selected_config(configuration, data):
+    res = {'plants': []}
+    for item in data:
+        tmp = item
+        if configuration.body[item['name']] != 0:
+            tmp['quantity'] = configuration.body[item['name']]
+            res['plants'].append(tmp)
+
+    res.update({'date': str(configuration.datetime)})
     return res
 
 
@@ -70,21 +139,17 @@ def extract_max_col_width(elements):
     return name_w, comp_w
 
 
-def render_opt_result(data):
-    res = 'Optimization for Date:\t' + data['result']['date'] + '\n\n'
+def render_opt_result_table(form, data):
+    form.table_title.data = 'Optimization for Date:\t' + data['result']['date']
 
-    name_w, comp_w = extract_max_col_width(data['result']['optimizations'])
-    print(name_w)
-    print(comp_w)
+    for e in data['result']['optimizations']:
+        row = OptimizationResultForm()
+        row.configuration = e['name']
+        row.composition = e['composition']
+        row.min_time = '-' if isinstance(e['minimized']['time'], str) else round(e['minimized']['time'], 2)
+        row.max_time = '-' if isinstance(e['maximized']['time'], str) else round(e['maximized']['time'], 2)
 
-    res += tabulate([[e['name'], e['composition'],
-                      '-' if isinstance(e['minimized']['time'], str) else round(e['minimized']['time'], 2),
-                      '-' if isinstance(e['maximized']['time'], str) else round(e['maximized']['time'], 2)] for e in
-                     data['result']['optimizations']],
-                    headers=['Configuration', 'Composition', 'Time for minimizazion(s)', 'Time for maximization(s)'],
-                    tablefmt='simple')
-
-    return res
+        form.rows.append_entry(row)
 
 
 def search_by_name(name, dictlist):
@@ -125,47 +190,3 @@ def subdict(d, ks):
         if len(ks) == 1:
             vals = [vals]
     return dict(zip(ks, vals))
-
-
-def plot_results(result, resolve_method='maximized'):
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility Results')
-    plt.xticks(range(0, 96, 5))
-    ax.plot(result[resolve_method]['MIN_GRID'], label='MIN_Flex ('+resolve_method+')')
-    ax.plot(result[resolve_method]['MAX_GRID'], label='MAX_Flex ('+resolve_method+')')
-    #ax.plot(result[resolve_method]['RES'], label='RES (maximized)')
-    # plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
-    plt.legend(bbox_to_anchor=(1, 1), loc='best', borderaxespad=0.)
-
-    fig2, ax = plt.subplots(figsize=(8, 4))
-    ax.set(xlabel='Time', ylabel='Cost (€/kW)', title='Costs')
-    plt.xticks(range(0, 96, 5))
-    ax.plot(result[resolve_method]['GAIN'], label='GAIN ('+resolve_method+')')
-    # plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.legend(bbox_to_anchor=(1, 1), loc='best', borderaxespad=0.)
-
-    fig3, ax = plt.subplots(figsize=(8, 4))
-    ax.set(xlabel='Time', ylabel='', title='BUY/SELL Activity')
-    plt.xticks(range(0, 96, 5))
-    ax.plot(result[resolve_method]['SELLING'], label='SELLING ('+resolve_method+')')
-    ax.plot(result[resolve_method]['BUYING'], label='BUYING ('+resolve_method+')')
-    # plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.legend(bbox_to_anchor=(1, 1), loc='best', borderaxespad=0.)
-
-    # Convert plot to PNG image
-    pngImage = io.BytesIO()
-    FigureCanvas(fig).print_png(pngImage)
-    pngImage2 = io.BytesIO()
-    FigureCanvas(fig2).print_png(pngImage2)
-    pngImage3 = io.BytesIO()
-    FigureCanvas(fig3).print_png(pngImage3)
-
-    # Encode PNG image to base64 string
-    pngImageB64String = "data:image/png;base64,"
-    pngImageB64String += base64.b64encode(pngImage.getvalue()).decode('utf8')
-    pngImageB64String2 = "data:image/png;base64,"
-    pngImageB64String2 += base64.b64encode(pngImage2.getvalue()).decode('utf8')
-    pngImageB64String3 = "data:image/png;base64,"
-    pngImageB64String3 += base64.b64encode(pngImage3.getvalue()).decode('utf8')
-
-    return pngImageB64String, pngImageB64String2, pngImageB64String3

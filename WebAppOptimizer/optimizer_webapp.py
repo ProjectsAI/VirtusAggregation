@@ -1,5 +1,5 @@
 from WebAppOptimizer.app import create_app, db, cli
-from WebAppOptimizer.app.models import User, Post, Configuration
+from WebAppOptimizer.app.models import User, Configuration
 
 app = create_app()
 cli.register(app)

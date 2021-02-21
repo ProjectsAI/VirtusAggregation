@@ -7,8 +7,8 @@ import numpy as np
 # Type 1 loads: not controllable
 class LoadT1(Profile):
 
-    def __init__(self, l, timestamps=96):
-        super().__init__(l, ProfileType.LOAD_T1, 0, 0, timestamps)
+    def __init__(self, l, timestamps=96, scale_factor=100):
+        super().__init__([0 if x < 0 else x * scale_factor for x in l], ProfileType.LOAD_T1, 0, 0, timestamps)
 
     def get_flexibility(self, type='minimized'):
         if type == 'minimized':
@@ -23,8 +23,8 @@ class LoadT1(Profile):
 class LoadT2(Profile):
 
     def __init__(self, l, allowed_t: [], allowed_reduction_total=25, allowed_reduction=np.iinfo(np.int32).max,
-                 cost_min=0, cost_max=0, timestamps=96):
-        super().__init__([0 if x < 0 else x for x in l], ProfileType.LOAD_T2, cost_min, cost_max, timestamps)
+                 cost_min=0, cost_max=0, timestamps=96, scale_factor=10000):
+        super().__init__([0 if x < 0 else x * scale_factor for x in l], ProfileType.LOAD_T2, cost_min, cost_max, timestamps)
         self.allowed_t = [1 if i in allowed_t else 0 for i in range(self.timestamps)]
         self.allowed_reduction_total = sum(l) * allowed_reduction_total / 100
         self.allowed_reduction = self.setup_array_for_property(allowed_reduction)

@@ -1,11 +1,9 @@
 import requests
-from flask import request
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, FormField, BooleanField, FieldList, FileField
 from wtforms.fields.html5 import IntegerRangeField, DateField
 from wtforms.validators import ValidationError, DataRequired, Length
 from flask_babel import _, lazy_gettext as _l
-from wtforms.widgets.html5 import NumberInput, RangeInput
 
 from WebAppOptimizer.app.models import User
 
@@ -55,9 +53,25 @@ class ConfigurationForm(FlaskForm):
     submit = SubmitField(_l('Submit'))
 
 
+class GetFromLibraResultForm(FlaskForm):
+    profile_id = StringField('Id')
+    profile_name = StringField('Name')
+    profile_description = StringField('Description')
+    profile = StringField('Profiles')
+
+
 class GetFromLibraForm(FlaskForm):
     submit = SubmitField(_l('Get Baselines'))
     textarea = TextAreaField(_l(''), render_kw={'class': 'form-control', 'rows': 5})
+    table_title = StringField('Date')
+    rows = FieldList(FormField(GetFromLibraResultForm))
+
+
+class OptimizationResultForm(FlaskForm):
+    configuration = StringField('Configuration')
+    composition = StringField('Composition')
+    min_time = StringField('Time for minimization(s)')
+    max_time = StringField('Time for maximization(s)')
 
 
 class OptimizationForm(FlaskForm):
@@ -65,3 +79,5 @@ class OptimizationForm(FlaskForm):
     image = FileField(u'Image File')
     submit2 = SubmitField(_l('Aggregate'))
     textarea = TextAreaField(_l(''), render_kw={'class': 'form-control', 'rows': 5})
+    table_title = StringField('Date')
+    rows = FieldList(FormField(OptimizationResultForm))

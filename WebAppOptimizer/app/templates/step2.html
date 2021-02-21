@@ -18,20 +18,34 @@
                     <div class="col-md-2">
                         {{ form.submit(class="btn btn-default get-profile", value="Load Profiles") }}
                     </div>
-                    <div id="loading"></div>
                 </p>
             </div>
-            <br>
-            <div class="row">
-                <p>Output:</p>
-            </div>
-            <div class="row">
+
+            <div class ="row" id="loading" style="display:none;">
                 <p>
-            <p>
-                <div class="md-form mb-4 pink-textarea active-pink-textarea">
-                    <i class="fas fa-angle-double-right prefix"></i>
-                       {{ form.textarea(class="md-textarea form-control",readonly=true, hidden=true, rows="10") }}
-                    </div>
+                    <img src="loading.gif" alt="Loading!" />
+                </p>
+            </div>
+
+            <div>
+                <p>
+                    <table class="table table-striped">
+                        <b>{{ form.table_title.data }}<b>
+                        <tr>
+                            <th> Id </th>
+                            <th> Name </th>
+                            <th> Description </th>
+                            <th> Profile Retrieved </th>
+                        </tr>
+                        {% for row in form.rows %}
+                        <tr>
+                            <td>{{ row.profile_id.data }}</td>
+                            <td>{{ row.profile_name.data }}</td>
+                            <td>{{ row.profile_description.data }}</td>
+                            <td>{{ row.profile.data }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
                 </p>
             </div>
         </form>

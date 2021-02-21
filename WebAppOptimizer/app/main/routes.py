@@ -82,12 +82,11 @@ def save_config():
 @login_required
 def second_step():
     if request.method == 'POST':
+        form = GetFromLibraForm()
         profiles_data = session['profiles_data']
 
-        rendering = render_data(profiles_data)
+        render_get_from_libra(form, profiles_data)
 
-        form = GetFromLibraForm()
-        form.textarea.data = rendering
         prev_url = url_for('main.first_step')
         next_url = url_for('main.third_step')
 
@@ -95,11 +94,10 @@ def second_step():
     else:
         form = GetFromLibraForm()
         prev_url = url_for('main.first_step')
-        next_url = url_for('main.third_step')
 
-        form.textarea.data = request.args.get('rendering')
+        form.table_title = {'disabled': True}
 
-        return render_template('step2.html', title=_('Step 2'), form=form, prev_url=prev_url, next_url=next_url)
+        return render_template('step2.html', title=_('Step 2'), form=form, prev_url=prev_url)
 
 
 @bp.route('/aggregator/get_baselines', methods=['POST'])
@@ -128,10 +126,9 @@ def third_step():
             response = requests.post('http://0.0.0.0:4996/api/local_optimization', json=to_optimize)
             result = response.json()
 
+            render_opt_result_table(form, result)
+
             form.submit2.render_kw = {'disabled': False}
-            print(result)
-            rendering = render_opt_result(result)
-            form.textarea.data = rendering
 
             session['local_opt_result_data'] = result
 
@@ -140,6 +137,7 @@ def third_step():
         if "submit2" in request.form:
             to_aggregate = session['local_opt_result_data']
             # print(to_aggregate)
+            print(form.table_title.data)
             response = requests.post('http://0.0.0.0:4996/api/aggregate', json=json.dumps(to_aggregate))
             result = response.json()
 
@@ -148,8 +146,8 @@ def third_step():
                                    prev_url=prev_url)
 
     else:
+        form.table_title = {'disabled': True}
         form.submit2.render_kw = {'disabled': True}
-        form.textarea.data = request.args.get('rendering')
         prev_url = url_for('main.second_step')
         return render_template('step3.html', title=_('Step 3'), form=form, prev_url=prev_url)
 

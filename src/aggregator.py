@@ -33,9 +33,9 @@ class Aggregator(object):
                 'flexibilities': []  # TODO: change 96 to timestamps
             },
             'costs': {
-                'buy': [10 if i < (96 / 2) else 13 for i in range(96)], #np.load('Prezzi_mercato_test/acquistiFinal.npy').tolist(),
-                'sell': [12 if i < (96 / 4) * 3 else 9 for i in range(96)], #np.load('Prezzi_mercato_test/acquistiFinal.npy').tolist(),
-                'production': [3 if i < (96 / 4) else 11 for i in range(96)]
+                'buy': np.load('Prices_test/buyTest.npy').tolist(), #[10 if i < (96 / 2) else 13 for i in range(96)], #
+                'sell': np.load('Prices_test/sellTest.npy').tolist(), #[12 if i < (96 / 4) * 3 else 9 for i in range(96)], #
+                'production': np.load('Prices_test/prodTest.npy').tolist(), #[3 if i < (96 / 4) else 11 for i in range(96)] #
             }
         }
         self.result = {

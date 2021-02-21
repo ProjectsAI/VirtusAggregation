@@ -18,6 +18,6 @@ class PV(Profile):
 
     def get_flexibility(self, type='minimized'):
         if type == 'minimized':
-            return self.min_flex
-        if type == 'maximized':
             return self.max_flex
+        if type == 'maximized':
+            return self.min_flex

@@ -17,9 +17,6 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['admin_prova@unibo.it']
     LANGUAGES = ['en', 'es']
-    MS_TRANSLATOR_KEY = os.environ.get('MS_TRANSLATOR_KEY')
-    POSTS_PER_PAGE = 25
     CONFS_PER_PAGE = 25
     SESSION_TYPE = os.environ.get('SESSION_TYPE')
-
     SESSION_REDIS = os.environ.get('SESSION_REDIS')
