@@ -36,7 +36,7 @@ AggregatedOptimization:
 
 Before running the web application, make sure to activate the optimizer server:
 ```
-python api.py 
+python apis.py 
 ``` 
 
 Open a new terminal, and execute:

@@ -52,7 +52,6 @@ class Solver:
         }
         # print(result_var['F_max'])
         self.results = {
-            'minimized': copy.deepcopy(result_var),
             'maximized': copy.deepcopy(result_var)
         }
 

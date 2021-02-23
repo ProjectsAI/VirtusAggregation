@@ -3,17 +3,17 @@ from src.pod import Pod
 
 class LocalOptimizationResult(object):
 
-    def __init__(self, date=None, result=None):
-        if result is None:
-            self.result = {
+    def __init__(self, date=None, data=None):
+        if data is None:
+            self.data = {
                 'date': date,
                 'optimizations': []
             }
         else:
-            self.result = result
+            self.data = data
 
     def get_optimizations(self):
-        return self.result['optimizations']
+        return self.data['optimizations']
 
     def populate(self, pods: [Pod]):
         for pod in pods:
@@ -32,4 +32,4 @@ class LocalOptimizationResult(object):
                     'time': pod.get_opt_time('maximized')
                 },
             }
-            self.result['optimizations'].append(element)
+            self.data['optimizations'].append(element)

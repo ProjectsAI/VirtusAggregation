@@ -76,7 +76,7 @@ def render_get_from_libra(form, data):
         row.profile_name = e['name']
         row.profile_description = e['description']
         is_ok = True
-        for subel in e['subplants']:
+        for subel in e['components']:
             if subel['type'] != 'SIMPLE_STORAGE':
                 is_ok *= True if subel['baseline'] is not None else False
         row.profile = '✓' if is_ok else 'X'
@@ -92,18 +92,19 @@ def render_data_old(data):
                'Name: {}\n'.format(element['id'], element['name'])
         if element['type'] == 'MIX':
             res += 'Mixed Configuration composed by:\n'
-        for sub_element in element['subplants']:
+        for c in element['components']:
             res += '\tID: {}\n' \
                    '\tName: {}\n' \
-                   '\tBaseline: {}\n'.format(sub_element['id'], sub_element['name'], sub_element['baseline'])
+                   '\tBaseline: {}\n'.format(c['id'], c['name'], c['baseline'])
         res += '\n\n'
 
     return res
 
 
 def get_selected_config(configuration, data):
-    res = {'plants': []}
-    for item in data:
+    res = {'uvamid': data['uvamid'],
+           'plants': []}
+    for item in data['data']:
         tmp = item
         if configuration.body[item['name']] != 0:
             tmp['quantity'] = configuration.body[item['name']]
@@ -140,9 +141,9 @@ def extract_max_col_width(elements):
 
 
 def render_opt_result_table(form, data):
-    form.table_title.data = 'Optimization for Date:\t' + data['result']['date']
+    form.table_title.data = 'Optimization for Date:\t' + data['data']['date']
 
-    for e in data['result']['optimizations']:
+    for e in data['data']['optimizations']:
         row = OptimizationResultForm()
         row.configuration = e['name']
         row.composition = e['composition']

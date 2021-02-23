@@ -33,20 +33,17 @@ class Aggregator(object):
                 'flexibilities': []  # TODO: change 96 to timestamps
             },
             'costs': {
-                'buy': np.load('Prices_test/buyTest.npy').tolist(), #[10 if i < (96 / 2) else 13 for i in range(96)], #
-                'sell': np.load('Prices_test/sellTest.npy').tolist(), #[12 if i < (96 / 4) * 3 else 9 for i in range(96)], #
-                'production': np.load('Prices_test/prodTest.npy').tolist(), #[3 if i < (96 / 4) else 11 for i in range(96)] #
+                'buy': np.load('Prices_test/buyTest.npy').tolist(),
+                # [10 if i < (96 / 2) else 13 for i in range(96)], #
+                'sell': np.load('Prices_test/sellTest.npy').tolist(),
+                # [12 if i < (96 / 4) * 3 else 9 for i in range(96)], #
+                'production': np.load('Prices_test/prodTest.npy').tolist(),
+                # [3 if i < (96 / 4) else 11 for i in range(96)] #
             }
         }
         self.result = {
-            'minimized': {
-                'flexibility': [0] * 96,  # TODO: change 96 to timestamps
-                'cost': [0] * 96
-            },
-            'maximized': {
-                'flexibility': [0] * 96,
-                'cost': [0] * 96,
-            },
+            'date': None,
+            'optimizations': None
         }
 
     def __init_input(self):
@@ -62,9 +59,9 @@ class Aggregator(object):
                 self.input['baseline'] = [x + y for x, y in zip(self.input['baseline'], el['baseline'])]
 
                 # Testing..
-                #self.input['maximized']['flexibilities'].append([20 if i < (96 / 2) else 20 for i in range(96)])
-                #self.input['minimized']['flexibilities'].append([10 if i < (96 / 2) else -10 for i in range(96)])
-                #self.input['baseline'] = [15 if i < (96 / 4) * 3 else 15 for i in range(96)]
+                # self.input['maximized']['flexibilities'].append([20 if i < (96 / 2) else 20 for i in range(96)])
+                # self.input['minimized']['flexibilities'].append([10 if i < (96 / 2) else -10 for i in range(96)])
+                # self.input['baseline'] = [15 if i < (96 / 4) * 3 else 15 for i in range(96)]
 
             self.__fix_flexibility_bounds()
             self.__fix_baseline()
@@ -86,7 +83,7 @@ class Aggregator(object):
 
         self.input['baseline'] = [i if b > i else b for i, b in zip(sum_max, self.input['baseline'])]
         self.input['baseline'] = [i if b < i else b for i, b in zip(sum_min, self.input['baseline'])]
-        #self.plot_results(sum_max, sum_min, self.input['baseline'])
+        # self.plot_results(sum_max, sum_min, self.input['baseline'])
 
     def add_pod(self, pod):
         if isinstance(pod, Pod):
@@ -129,21 +126,6 @@ class Aggregator(object):
         return self.aggregate()
 
     # AGGREGATE METHODS
-    def aggregate_from_local_opt_result(self):
-        try:
-            for el in self.local_optimization_result.get_optimizations():
-                self.result['minimized']['flexibility'] = [sum(x) for x in zip(self.result['minimized']['flexibility'],
-                                                                               el['minimized']['flexibility'])]
-                self.result['maximized']['flexibility'] = [sum(x) for x in zip(self.result['maximized']['flexibility'],
-                                                                               el['maximized']['flexibility'])]
-                self.result['minimized']['cost'] = [sum(x) for x in zip(self.result['minimized']['cost'],
-                                                                        el['minimized']['cost'])]
-                self.result['maximized']['cost'] = [sum(x) for x in zip(self.result['maximized']['cost'],
-                                                                        el['maximized']['cost'])]
-
-                return self.result
-        except:
-            raise Exception('LocalOptimizationResult not correctly set.')
 
     # New Aggregator -  optimization model
     def aggregate(self, model_resolve_method=ModelResolveMethod.MAXIMIZE, print_results=True,
@@ -155,6 +137,9 @@ class Aggregator(object):
         self.solver = Solver(self.input)
 
         self.solver.resolve(model_resolve_method, print_results, tee, pprint)
+
+        self.result['date'] = self.local_optimization_result.data['date']
+        self.result['optimizations'] = self.solver.results
 
         if print_graphs:
             if model_resolve_method == ModelResolveMethod.MINIMIZE:
@@ -169,7 +154,7 @@ class Aggregator(object):
         if per_allegra:
             self.graphs_for_allegra()
 
-        return self.solver.results
+        return self.result
 
     def print_graph(self, method):
         fig, ax = plt.subplots(figsize=(20, 15))

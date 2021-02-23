@@ -39,7 +39,7 @@ def index():
 def first_step():
     form = ConfigurationForm()
 
-    response = requests.get('http://0.0.0.0:4996/api/get_plants')
+    response = requests.get('http://0.0.0.0:4996/api/27/getInfo')
     session['plants_data'] = response.json()
     if request.method == 'POST':
         return redirect(url_for('main.save_config', form=form))
@@ -64,9 +64,9 @@ def save_config():
         db.session.add(conf)
         db.session.commit()
 
-    selelectedconfig = get_selected_config(conf, session['plants_data']['data'])
+    selelectedconfig = get_selected_config(conf, session['plants_data'])
     session.clear()
-    session['config_data'] = json.dumps(selelectedconfig)
+    session['config_data'] = selelectedconfig
     session['rendering_data'] = json.dumps("")
 
     flash('Configuration successfully set.')
@@ -104,8 +104,7 @@ def second_step():
 @login_required
 def get_baselines():
     configuration = session['config_data']
-    response = requests.get('http://0.0.0.0:4996/api/get_baselines', json=configuration)
-
+    response = requests.post('http://0.0.0.0:4996/api/'+str(configuration['uvamid'])+'/readProfiles', json=configuration)
     profiles = create_profiles(response.json())
     session['profiles_data'] = profiles
 
@@ -123,7 +122,8 @@ def third_step():
 
         if "submit1" in request.form:
             to_optimize = session['profiles_data']
-            response = requests.post('http://0.0.0.0:4996/api/local_optimization', json=to_optimize)
+            response = requests.post('http://0.0.0.0:4996/api/runLocalOptimization', json=to_optimize)
+
             result = response.json()
 
             render_opt_result_table(form, result)
@@ -136,12 +136,11 @@ def third_step():
 
         if "submit2" in request.form:
             to_aggregate = session['local_opt_result_data']
-            # print(to_aggregate)
-            print(form.table_title.data)
-            response = requests.post('http://0.0.0.0:4996/api/aggregate', json=json.dumps(to_aggregate))
+
+            response = requests.post('http://0.0.0.0:4996/api/runAggregatedOptimization', json=json.dumps(to_aggregate))
             result = response.json()
 
-            image1, image2, image3 = plot_results(result)
+            image1, image2, image3 = plot_results(result['data']['optimizations'])
             return render_template('step3.html', title=_('Step 3'), form=form, images=[image1, image2, image3],
                                    prev_url=prev_url)
 

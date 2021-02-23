@@ -35,12 +35,12 @@ class PostForm(FlaskForm):
 
 
 class BodyForm(FlaskForm):
-    config = requests.get('http://0.0.0.0:4996/api/get_plants').json()['data']
-    # ['PONTLAB_1', 'PONTLAB_2', 'PV_1', "PV_2", "WIND_1", "WIND_2", 'BESS_1', 'BESS_2', 'LOAD_1', 'LOAD_2','LOAD_3', 'LOAD_4', "CONF_1", "CONF_2"]
+    config = requests.get('http://0.0.0.0:4996/api/27/getInfo').json()['data']
+    # ['PONTLAB_1', 'PONTLAB_2', 'PV_1', "PV_2", "WIND_1", "WIND_2", 'BESS_1', 'BESS_2', 'LOAD_1', 'LOAD_2','LOAD_3', 'LOAD_4', "CONF_1", "CONF_2","CONF_3", "CONF_4","CONF_5", "CONF_6", "CONF_7" ]
 
     i = 0
     for c in config:
-        vars()[c['name']] = IntegerRangeField(_prefix=i, label=c['name'], default=0)
+        vars()[c['name']] = IntegerRangeField(_prefix=i, label=c['name'], default=0, id=c['description'])
         vars()[str(c['id'])] = StringField(default=c['description'])
         i += 1
 

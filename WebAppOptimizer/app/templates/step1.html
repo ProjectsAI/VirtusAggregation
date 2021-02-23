@@ -25,32 +25,35 @@
         <form method="POST" action="{{ url_for('main.save_config') }}">
         {{ form.hidden_tag() }}
             {{ form.body.hidden_tag() }}
-            {% for field in form.body %}
-                {% if field.widget.input_type != 'hidden' %}
-                <div class="row">
-                    {% if field.type == 'IntegerRangeField' %}
-                    <p>
-                            <div class="col-md-1">
-                                <b>{{ field.label }}</b>
-                            </div>
-                            <div class="col-md-2">
-                                {{ field(min=0, max=10, step=1, class="border-0", oninput="javascript:valueSpanUpdate(id, value)")}}
-                            </div>
-                            <div class="col-md-2">
-                                <span class="font-weight-bold text-primary ml-2 mt-1" id="value{{ field.id }}">{{ field.data }}</span>
-                            </div>
-                    </p>
-                    {% endif %}
-                    {% if field.type == 'StringField' %}
-                        <div class="col-md-1">
-                        </div>
-                        <div class="col-md-4">
-                            {{ field.data }}
-                        </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-            {% endfor %}
+            <table class="table table-striped">
+                        <tr>
+                            <th> Configuration </th>
+                            <th> Description </th>
+                        </tr>
+                        {% for field in form.body %}
+                        {% if field.type == 'IntegerRangeField' %}
+                        <tr>
+                            <td>
+                                <div class="col-md-3">
+                                    <b>{{ field.label }}</b>
+                                </div>
+                                <div class="col-md-5">
+                                    {{ field(min=0, max=10, step=1, class="border-0", oninput="javascript:valueSpanUpdate(id, value)")}}
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="font-weight-bold text-primary ml-2 mt-1" id="value{{ field.id }}">{{ field.data }}</span>
+                                </div>
+                            </td>
+
+                            <td>
+                              <div class="col-md-12">
+                                  {{ field.id }}
+                              </div>
+                            </td>
+                        </tr>
+                         {% endif %}
+                        {% endfor %}
+            </table>
                 <p>
                     <div class="row">
                         <div class="col-md-2">
