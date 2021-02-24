@@ -14,6 +14,7 @@ from flask import Flask
 from flask_kvsession import KVSessionExtension
 from simplekv.memory.redisstore import RedisStore
 
+# from WebAppOptimizer.config import Config
 from WebAppOptimizer.config import Config
 
 db = SQLAlchemy()
@@ -25,8 +26,6 @@ mail = Mail()
 bootstrap = Bootstrap()
 moment = Moment()
 babel = Babel()
-
-
 
 
 def create_app(config_class=Config):
@@ -70,7 +69,7 @@ def create_app(config_class=Config):
 
         if not os.path.exists('logs'):
             os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/microblog.log',
+        file_handler = RotatingFileHandler('logs/webappoptimizer.log',
                                            maxBytes=10240, backupCount=10)
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s '
@@ -79,7 +78,7 @@ def create_app(config_class=Config):
         app.logger.addHandler(file_handler)
 
         app.logger.setLevel(logging.INFO)
-        app.logger.info('Microblog startup')
+        app.logger.info('WebAppOptimizer startup')
 
     app.config["DEBUG"] = True
 

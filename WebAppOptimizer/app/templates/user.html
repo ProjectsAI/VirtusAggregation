@@ -15,22 +15,55 @@
                 {% endif %}
             </td>
         </tr>
+        <tr>
+            <table class="table table-striped">
+            {% for conf in configurations %}
+                <tr>
+                    <td width="70px">
+                        <a href="{{ url_for('main.user', username=conf.user.username) }}">
+                            <img src="{{ conf.user.avatar(70) }}" />
+                        </a>
+                        {% set user_link %}
+                            <a href="{{ url_for('main.user', username=conf.user.username) }}">
+                                {{ conf.user.username }}
+                            </a>
+                        {% endset %}
+                    </td>
+                    <td>
+
+                        <b>{{ conf.confname }}</b> -
+                        <i> {{ moment(conf.timestamp).fromNow() }}</i>
+                        <br>
+                        <span id="conf{{ conf.id }}">Date: {{ conf.datetime }}<br><br>Configuration:<br>{{ conf.body }}</span>
+                    </td>
+                    <td width="70px">
+                        {% if user == current_user %}
+                        <p>
+                            <form method="post" action="{{ url_for('main.delete_config', conf_id=conf.id, username=conf.user.username) }}">
+                            {{ form.submit(class="btn btn-default get-profile", value="Delete") }}
+                            </form>
+                            </p>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+        </tr>
+        <tr>
+            <nav aria-label="...">
+                <ul class="pager">
+                    <li class="previous{% if not prev_url %} disabled{% endif %}">
+                        <a href="{{ prev_url or '#' }}">
+                            <span aria-hidden="true">&larr;</span> {{ _('Previous page') }}
+                        </a>
+                    </li>
+                    <li class="next{% if not next_url %} disabled{% endif %}">
+                        <a href="{{ next_url or '#' }}">
+                            {{ _('Next page') }} <span aria-hidden="true">&rarr;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </tr>
     </table>
-    {% for conf in configurations %}
-        {% include '_conf.html' %}
-    {% endfor %}
-    <nav aria-label="...">
-        <ul class="pager">
-            <li class="previous{% if not prev_url %} disabled{% endif %}">
-                <a href="{{ prev_url or '#' }}">
-                    <span aria-hidden="true">&larr;</span> {{ _('Previous page') }}
-                </a>
-            </li>
-            <li class="next{% if not next_url %} disabled{% endif %}">
-                <a href="{{ next_url or '#' }}">
-                    {{ _('Next page') }} <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
 {% endblock %}

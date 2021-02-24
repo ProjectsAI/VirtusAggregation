@@ -12,7 +12,7 @@ from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 from WebAppOptimizer.app import db
 from WebAppOptimizer.app.main.forms import EditProfileForm, EmptyForm, ConfigurationForm, GetFromLibraForm, OptimizationForm, BodyForm
-from WebAppOptimizer.app.models import User, Post, Configuration
+from WebAppOptimizer.app.models import User, Configuration
 from WebAppOptimizer.app.main import bp
 import requests
 
@@ -51,6 +51,7 @@ def first_step():
 @login_required
 def save_config():
     form = ConfigurationForm(request.form)
+
     if not form.remember_conf.data:
         conf = Configuration(confname='Unknown',
                              body=subdict(form.body.data, [i['name'] for i in session['plants_data']['data']]),
@@ -61,6 +62,7 @@ def save_config():
                              body=subdict(form.body.data, [i['name'] for i in session['plants_data']['data']]),
                              datetime=form.date.data, user=current_user,
                              timestamp=datetime.utcnow())
+
         db.session.add(conf)
         db.session.commit()
 
@@ -181,6 +183,9 @@ def run_second_optimization():
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     page = request.args.get('page', 1, type=int)
+
+    print(user.configurations.order_by(Configuration.timestamp.desc()))
+
     configurations = user.configurations.order_by(Configuration.timestamp.desc()).paginate(
         page, current_app.config['CONFS_PER_PAGE'], False)
     # next_url = url_for('main.user', username=user.username,
