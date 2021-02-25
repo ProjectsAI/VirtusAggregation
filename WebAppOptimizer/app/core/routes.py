@@ -85,9 +85,15 @@ def save_config():
 def second_step():
     if request.method == 'POST':
         form = GetFromLibraForm()
-        profiles_data = session['profiles_data']
+        #profiles_data = session['profiles_data']
+        configuration = session['config_data']
+        response = requests.post('http://0.0.0.0:4996/api/' + str(configuration['uvamid']) + '/readProfiles',
+                                 json=configuration)
 
-        render_get_from_libra(form, profiles_data)
+        profiles = create_profiles(response.json())
+        session['profiles_data'] = profiles
+        print(profiles)
+        render_get_from_libra(form, profiles)
 
         prev_url = url_for('core.first_step')
         next_url = url_for('core.third_step')
@@ -95,11 +101,16 @@ def second_step():
         return render_template('step2.html', title=_('Step 2'), form=form, prev_url=prev_url, next_url=next_url)
     else:
         form = GetFromLibraForm()
+        next_url = None
+
+        if session.get('profiles_data') is not None:
+            render_get_from_libra(form, session['profiles_data'])
+            next_url = url_for('core.third_step')
+
         prev_url = url_for('core.first_step')
 
-        form.table_title = {'disabled': True}
 
-        return render_template('step2.html', title=_('Step 2'), form=form, prev_url=prev_url)
+        return render_template('step2.html', title=_('Step 2'), form=form, prev_url=prev_url, next_url=next_url)
 
 
 @bp.route('/aggregator/get_profiles', methods=['POST'])
@@ -138,19 +149,29 @@ def third_step():
 
         if "submit2" in request.form:
             to_aggregate = session['local_opt_result_data']
-
+            render_opt_result_table(form, to_aggregate)
             response = requests.post('http://0.0.0.0:4996/api/runAggregatedOptimization', json=json.dumps(to_aggregate))
             result = response.json()
+            session['aggregated_opt_result_data'] = result
 
             images = plot_results(result['data']['optimizations'])
             return render_template('step3.html', title=_('Step 3'), form=form, images=images,
                                    prev_url=prev_url)
 
     else:
-        form.table_title = {'disabled': True}
-        form.submit2.render_kw = {'disabled': True}
+        images = []
+
+        if session.get('local_opt_result_data') is not None:
+            render_opt_result_table(form, session['local_opt_result_data'])
+            if session.get('aggregated_opt_result_data') is not None:
+                images = plot_results(session['aggregated_opt_result_data']['data']['optimizations'])
+
+        else:
+            form.table_title = {'disabled': True}
+            form.submit2.render_kw = {'disabled': True}
+
         prev_url = url_for('core.second_step')
-        return render_template('step3.html', title=_('Step 3'), form=form, prev_url=prev_url)
+        return render_template('step3.html', title=_('Step 3'), form=form, prev_url=prev_url, images=images)
 
 
 @bp.route('/aggregator/run_first_optimization', methods=['GET', 'POST'])
