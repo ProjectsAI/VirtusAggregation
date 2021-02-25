@@ -113,17 +113,6 @@ def second_step():
         return render_template('step2.html', title=_('Step 2'), form=form, prev_url=prev_url, next_url=next_url)
 
 
-@bp.route('/aggregator/get_profiles', methods=['POST'])
-@login_required
-def get_profiles():
-    configuration = session['config_data']
-    response = requests.post('http://0.0.0.0:4996/api/'+str(configuration['uvamid'])+'/readProfiles', json=configuration)
-    profiles = create_profiles(response.json())
-    session['profiles_data'] = profiles
-
-    return redirect(url_for('core.second_step'), code=307)
-
-
 ##########################   THIRD STEP   ##################################
 
 @bp.route('/webapp/third_step', methods=['GET', 'POST'])
@@ -173,31 +162,6 @@ def third_step():
         prev_url = url_for('core.second_step')
         return render_template('step3.html', title=_('Step 3'), form=form, prev_url=prev_url, images=images)
 
-
-@bp.route('/aggregator/run_first_optimization', methods=['GET', 'POST'])
-@login_required
-def run_first_optimization():
-    to_optimize = session['profiles_data']
-
-    response = requests.post('http://0.0.0.0:4996/api/local_optimization', json=to_optimize)
-    result = response.json()
-    session['first_optimization_data'] = result
-
-    return redirect(url_for('core.third_step'), code=307)
-
-
-@bp.route('/aggregator/run_second_optimization', methods=['GET', 'POST'])
-@login_required
-def run_second_optimization():
-    to_optimize = session['profiles_data']
-
-    response = requests.post('http://0.0.0.0:4996/api/optimize_and_aggregate', json=to_optimize)
-    result = response.json()
-
-    session['second_optimization_data'] = result
-    return redirect(url_for('core.third_step'), code=307)
-
-
 ##########################   PROFILE   ##################################
 @bp.route('/user/<username>')
 @login_required
@@ -232,8 +196,8 @@ def delete_config(conf_id):
 @login_required
 def explore():
     page = request.args.get('page', 1, type=int)
-    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
+    posts = Configuration.query.order_by(Configuration.timestamp.desc()).paginate(
+        page, current_app.config['CONFS_PER_PAGE'], False)
     next_url = url_for('core.explore', page=posts.next_num) \
         if posts.has_next else None
     prev_url = url_for('core.explore', page=posts.prev_num) \
@@ -258,10 +222,3 @@ def edit_profile():
         form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', title=_('Edit Profile'),
                            form=form)
-
-# @bp.route('/translate', methods=['POST'])
-# @login_required
-# def translate_text():
-#    return jsonify({'text': translate(request.form['text'],
-#                                      request.form['source_language'],
-#                                      request.form['dest_language'])})
