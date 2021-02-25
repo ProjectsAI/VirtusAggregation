@@ -22,7 +22,7 @@
           </ul>
         </div>
 
-        <form method="POST" action="{{ url_for('main.save_config') }}">
+        <form method="POST" action="{{ url_for('core.save_config') }}">
         {{ form.hidden_tag() }}
             {{ form.body.hidden_tag() }}
             <table class="table table-striped">
@@ -47,7 +47,7 @@
 
                             <td>
                               <div class="col-md-12">
-                                  {{ field.id }}
+                                  {{ field.description }}
                               </div>
                             </td>
                         </tr>

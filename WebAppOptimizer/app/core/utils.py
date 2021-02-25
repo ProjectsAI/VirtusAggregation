@@ -6,7 +6,7 @@ import base64
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
-from WebAppOptimizer.app.main.forms import OptimizationResultForm, GetFromLibraResultForm
+from WebAppOptimizer.app.core.forms import OptimizationResultForm, GetFromLibraResultForm
 
 matplotlib.use('Agg')
 
@@ -17,24 +17,42 @@ plants = ['PONTLAB_1', 'PONTLAB_2', 'PV_1', "PV_2", "WIND_1", "WIND_2", 'BESS_1'
 ##########################   UTILS   ##################################
 
 
-def plot_results(result, resolve_method='maximized'):
-    fig1, ax = plt.subplots(figsize=(8, 4))
-    ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility')
-    plt.xticks(range(0, 96, 5))
+def plot_results(result, resolve_method='maximized', side_by_side=False):
+    if side_by_side:
+        fig12, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 4))
+        ax[0].set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility')
+        plt.xticks(range(0, 96, 5))
 
-    ax.plot(result[resolve_method]['Old_f_max'], label='Flexibility Upper Bound', color='#ff7f0e')
-    ax.plot(result[resolve_method]['Old_f_min'], label='Flexibility Lower Bound', color='#1f77b4')
-    ax.plot(result[resolve_method]['baseline'], label='Baseline', color='#bcbd22', linewidth=1)
-    plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+        ax[0].plot(result[resolve_method]['Old_f_max'], label='Flexibility Upper Bound', color='#ff7f0e')
+        ax[0].plot(result[resolve_method]['Old_f_min'], label='Flexibility Lower Bound', color='#1f77b4')
+        ax[0].plot(result[resolve_method]['baseline'], label='Baseline', color='#bcbd22', linewidth=1)
+        plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
 
-    fig2, ax = plt.subplots(figsize=(8, 4))
-    ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility Optimized')
-    plt.xticks(range(0, 96, 5))
+        ax[1].set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility Optimized')
+        plt.xticks(range(0, 96, 5))
 
-    ax.plot(result[resolve_method]['F_max'], label='Optimized Flexibility UB', color='#ff7f0e')
-    ax.plot(result[resolve_method]['F_min'], label='Optimized Flexibility LB', color='#1f77b4')
-    ax.plot(result[resolve_method]['baseline'], label='Baseline', color='#bcbd22', linewidth=1)
-    plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+        ax[1].plot(result[resolve_method]['F_max'], label='Optimized Flexibility UB', color='#ff7f0e')
+        ax[1].plot(result[resolve_method]['F_min'], label='Optimized Flexibility LB', color='#1f77b4')
+        ax[1].plot(result[resolve_method]['baseline'], label='Baseline', color='#bcbd22', linewidth=1)
+        plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+    else:
+        fig1, ax = plt.subplots(figsize=(8, 4))
+        ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility')
+        plt.xticks(range(0, 96, 5))
+
+        ax.plot(result[resolve_method]['Old_f_max'], label='Flexibility Upper Bound', color='#ff7f0e')
+        ax.plot(result[resolve_method]['Old_f_min'], label='Flexibility Lower Bound', color='#1f77b4')
+        ax.plot(result[resolve_method]['baseline'], label='Baseline', color='#bcbd22', linewidth=1)
+        plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+
+        fig2, ax = plt.subplots(figsize=(8, 4))
+        ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility Optimized')
+        plt.xticks(range(0, 96, 5))
+
+        ax.plot(result[resolve_method]['F_max'], label='Optimized Flexibility UB', color='#ff7f0e')
+        ax.plot(result[resolve_method]['F_min'], label='Optimized Flexibility LB', color='#1f77b4')
+        ax.plot(result[resolve_method]['baseline'], label='Baseline', color='#bcbd22', linewidth=1)
+        plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
 
     fig3, ax = plt.subplots(figsize=(8, 4))
     ax.set(xlabel='Time', ylabel='Cost (€)', title='Total Profit')
@@ -49,22 +67,35 @@ def plot_results(result, resolve_method='maximized'):
     plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
 
     # Convert plot to PNG image
-    pngImage1 = io.BytesIO()
-    FigureCanvas(fig1).print_png(pngImage1)
-    pngImage2 = io.BytesIO()
-    FigureCanvas(fig2).print_png(pngImage2)
+    if side_by_side:
+        pngImage12 = io.BytesIO()
+        FigureCanvas(fig12).print_png(pngImage12)
+    else:
+        pngImage1 = io.BytesIO()
+        FigureCanvas(fig1).print_png(pngImage1)
+        pngImage2 = io.BytesIO()
+        FigureCanvas(fig2).print_png(pngImage2)
     pngImage3 = io.BytesIO()
     FigureCanvas(fig3).print_png(pngImage3)
 
     # Encode PNG image to base64 string
-    pngImageB64String1 = "data:image/png;base64,"
-    pngImageB64String1 += base64.b64encode(pngImage1.getvalue()).decode('utf8')
-    pngImageB64String2 = "data:image/png;base64,"
-    pngImageB64String2 += base64.b64encode(pngImage2.getvalue()).decode('utf8')
+    res = []
+    if side_by_side:
+        pngImageB64String12 = "data:image/png;base64,"
+        pngImageB64String12 += base64.b64encode(pngImage12.getvalue()).decode('utf8')
+        res.append(pngImageB64String12)
+    else:
+        pngImageB64String1 = "data:image/png;base64,"
+        pngImageB64String1 += base64.b64encode(pngImage1.getvalue()).decode('utf8')
+        pngImageB64String2 = "data:image/png;base64,"
+        pngImageB64String2 += base64.b64encode(pngImage2.getvalue()).decode('utf8')
+        res.append(pngImageB64String1)
+        res.append(pngImageB64String2)
     pngImageB64String3 = "data:image/png;base64,"
     pngImageB64String3 += base64.b64encode(pngImage3.getvalue()).decode('utf8')
+    res.append(pngImageB64String3)
 
-    return pngImageB64String1, pngImageB64String2, pngImageB64String3
+    return res
 
 
 def render_get_from_libra(form, data):

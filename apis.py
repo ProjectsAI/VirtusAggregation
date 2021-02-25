@@ -5,7 +5,7 @@ import json
 import numpy as np
 from flask import jsonify
 
-from apis_utils import subdict, searchbyId, load_baseline, init_aggregator, platform, get_uvam_by_id
+from apis_utils import subdict, searchbyId, load_baseline, init_aggregator, get_uvam_by_id
 
 np.random.seed(10)
 app = Flask(__name__)

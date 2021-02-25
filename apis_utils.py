@@ -513,10 +513,10 @@ def load_profile(element):
     if element['type'] == 'LOAD_T3':
         if element['name'] == 'LOAD_4':
             profile = LoadT3(np.array(element['baseline']),
-                             [x for x in list(range(0, 96)) if x not in list(range(0, 10))], 15)  # [shift - no_loss]
+                             [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 15)  # [shift - loss]
         else:
             profile = LoadT3(np.array(element['baseline']),
-                             [x for x in list(range(0, 96)) if x not in list(range(0, 10))],
+                             [x for x in list(range(0, 96)) if x not in list(range(15, 25))],
                              0)  # [shift - no_loss]
     return profile
 

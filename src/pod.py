@@ -79,6 +79,8 @@ class Pod(object):
         self.solver = Solver(self.profiles)
 
         self.solver.resolve(model_resolve_method, print_results, tee, pprint)
+        self.__fix_flexibility_bounds()
+        self.__fix_baseline()
 
         if print_graphs:
             if model_resolve_method == ModelResolveMethod.MINIMIZE:
@@ -94,6 +96,21 @@ class Pod(object):
             self.graphs_for_allegra()
 
         return self
+
+    # Minimized Flexibility value cannot exceed Maximized Flexibility value
+    def __fix_flexibility_bounds(self):
+        for i in range(0, len(self.solver.results['maximized']['grid'])):
+            self.solver.results['maximized']['grid'] = [x if x > y else y for x, y in
+                                                        zip(self.solver.results['minimized']['grid'],
+                                                            self.solver.results['maximized']['grid'])]
+
+    # Baseline value cannot exceed Flexibility bounds (misscalculated because SimpleStorage has no baseline)
+    def __fix_baseline(self):
+        print(self.solver.results['baseline'])
+        self.solver.results['baseline'] = [i if b > i else b for i, b in zip(self.solver.results['maximized']['grid'],
+                                                                             self.solver.results['baseline'])]
+        self.solver.results['baseline'] = [i if b < i else b for i, b in zip(self.solver.results['minimized']['grid'],
+                                                                             self.solver.results['baseline'])]
 
     def needs_local_optimization(self):
         return self.to_optimize
@@ -184,7 +201,7 @@ class Pod(object):
         plt.xticks(range(0, 96, 5))
 
         ax.plot(self.solver.results['minimized']['grid'], label='Grid (minimized)')
-        # ax.plot(self.sum_baseline(), label='Total Baseline')
+        ax.plot(self.solver.results['baseline'], label='Total Baseline')
         ax.plot(self.solver.results['maximized']['grid'], label='Grid (maximized)')
         plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
         plt.show()

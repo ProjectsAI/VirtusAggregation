@@ -40,7 +40,9 @@ class BodyForm(FlaskForm):
 
     i = 0
     for c in config:
-        vars()[c['name']] = IntegerRangeField(_prefix=i, label=c['name'], default=0, id=c['description'])
+        #if c['name'] == 'PONTLAB_1' or c['name'] == 'PONTLAB_2' or c['name'] ==  'BESS_1' or c['name'] == 'BESS_2' or c['name'] == 'LOAD_4':
+        #    continue
+        vars()[c['name']] = IntegerRangeField(_prefix=i, label=c['name'], default=0, description=c['description'])
         vars()[str(c['id'])] = StringField(default=c['description'])
         i += 1
 

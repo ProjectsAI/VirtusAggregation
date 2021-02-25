@@ -3,7 +3,7 @@ import sys
 
 from wtforms.fields.html5 import IntegerRangeField
 
-from WebAppOptimizer.app.main.utils import *
+from WebAppOptimizer.app.core.utils import *
 
 from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, g, \
@@ -11,9 +11,9 @@ from flask import render_template, flash, redirect, url_for, request, g, \
 from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 from WebAppOptimizer.app import db
-from WebAppOptimizer.app.main.forms import EditProfileForm, EmptyForm, ConfigurationForm, GetFromLibraForm, OptimizationForm, BodyForm
+from WebAppOptimizer.app.core.forms import EditProfileForm, EmptyForm, ConfigurationForm, GetFromLibraForm, OptimizationForm, BodyForm
 from WebAppOptimizer.app.models import User, Configuration
-from WebAppOptimizer.app.main import bp
+from WebAppOptimizer.app.core import bp
 import requests
 
 
@@ -42,7 +42,7 @@ def first_step():
     response = requests.get('http://0.0.0.0:4996/api/27/getInfo')
     session['plants_data'] = response.json()
     if request.method == 'POST':
-        return redirect(url_for('main.save_config', form=form))
+        return redirect(url_for('core.save_config', form=form))
     else:
         return render_template('step1.html', title=_('Step 1'), form=form)
 
@@ -73,9 +73,9 @@ def save_config():
 
     flash('Configuration successfully set.')
 
-    prev_url = url_for('main.first_step')
+    prev_url = url_for('core.first_step')
 
-    return redirect(url_for('main.second_step', prev_url=prev_url))
+    return redirect(url_for('core.second_step', prev_url=prev_url))
 
 
 ##########################   SECOND STEP   ##################################
@@ -89,28 +89,28 @@ def second_step():
 
         render_get_from_libra(form, profiles_data)
 
-        prev_url = url_for('main.first_step')
-        next_url = url_for('main.third_step')
+        prev_url = url_for('core.first_step')
+        next_url = url_for('core.third_step')
 
         return render_template('step2.html', title=_('Step 2'), form=form, prev_url=prev_url, next_url=next_url)
     else:
         form = GetFromLibraForm()
-        prev_url = url_for('main.first_step')
+        prev_url = url_for('core.first_step')
 
         form.table_title = {'disabled': True}
 
         return render_template('step2.html', title=_('Step 2'), form=form, prev_url=prev_url)
 
 
-@bp.route('/aggregator/get_baselines', methods=['POST'])
+@bp.route('/aggregator/get_profiles', methods=['POST'])
 @login_required
-def get_baselines():
+def get_profiles():
     configuration = session['config_data']
     response = requests.post('http://0.0.0.0:4996/api/'+str(configuration['uvamid'])+'/readProfiles', json=configuration)
     profiles = create_profiles(response.json())
     session['profiles_data'] = profiles
 
-    return redirect(url_for('main.second_step'), code=307)
+    return redirect(url_for('core.second_step'), code=307)
 
 
 ##########################   THIRD STEP   ##################################
@@ -120,7 +120,7 @@ def get_baselines():
 def third_step():
     form = OptimizationForm()
     if request.method == 'POST':
-        prev_url = url_for('main.second_step')
+        prev_url = url_for('core.second_step')
 
         if "submit1" in request.form:
             to_optimize = session['profiles_data']
@@ -142,14 +142,14 @@ def third_step():
             response = requests.post('http://0.0.0.0:4996/api/runAggregatedOptimization', json=json.dumps(to_aggregate))
             result = response.json()
 
-            image1, image2, image3 = plot_results(result['data']['optimizations'])
-            return render_template('step3.html', title=_('Step 3'), form=form, images=[image1, image2, image3],
+            images = plot_results(result['data']['optimizations'])
+            return render_template('step3.html', title=_('Step 3'), form=form, images=images,
                                    prev_url=prev_url)
 
     else:
         form.table_title = {'disabled': True}
         form.submit2.render_kw = {'disabled': True}
-        prev_url = url_for('main.second_step')
+        prev_url = url_for('core.second_step')
         return render_template('step3.html', title=_('Step 3'), form=form, prev_url=prev_url)
 
 
@@ -162,7 +162,7 @@ def run_first_optimization():
     result = response.json()
     session['first_optimization_data'] = result
 
-    return redirect(url_for('main.third_step'), code=307)
+    return redirect(url_for('core.third_step'), code=307)
 
 
 @bp.route('/aggregator/run_second_optimization', methods=['GET', 'POST'])
@@ -174,7 +174,7 @@ def run_second_optimization():
     result = response.json()
 
     session['second_optimization_data'] = result
-    return redirect(url_for('main.third_step'), code=307)
+    return redirect(url_for('core.third_step'), code=307)
 
 
 ##########################   PROFILE   ##################################
@@ -188,9 +188,9 @@ def user(username):
 
     configurations = user.configurations.order_by(Configuration.timestamp.desc()).paginate(
         page, current_app.config['CONFS_PER_PAGE'], False)
-    # next_url = url_for('main.user', username=user.username,
+    # next_url = url_for('core.user', username=user.username,
     #                   page=configuration.next_num) if configuration.has_next else None
-    # prev_url = url_for('main.user', username=user.username,
+    # prev_url = url_for('core.user', username=user.username,
     #                   page=configuration.prev_num) if configuration.has_prev else None
     form = EmptyForm()
     return render_template('user.html', user=user, configurations=configurations.items,
@@ -204,7 +204,7 @@ def delete_config(conf_id):
     db.session.delete(conf)
     db.session.commit()
     flash(_('Item deleted.'))
-    return redirect(url_for('main.user', username=current_user.username))
+    return redirect(url_for('core.user', username=current_user.username))
 
 
 @bp.route('/explore')
@@ -213,9 +213,9 @@ def explore():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.explore', page=posts.next_num) \
+    next_url = url_for('core.explore', page=posts.next_num) \
         if posts.has_next else None
-    prev_url = url_for('main.explore', page=posts.prev_num) \
+    prev_url = url_for('core.explore', page=posts.prev_num) \
         if posts.has_prev else None
     return render_template('index.html', title=_('Explore'),
                            posts=posts.items, next_url=next_url,
@@ -231,7 +231,7 @@ def edit_profile():
         current_user.about_me = form.about_me.data
         db.session.commit()
         flash(_('Your changes have been saved.'))
-        return redirect(url_for('main.edit_profile'))
+        return redirect(url_for('core.edit_profile'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me

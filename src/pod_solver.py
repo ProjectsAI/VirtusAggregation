@@ -61,7 +61,8 @@ class Solver:
         }
         self.results = {
             'minimized': copy.deepcopy(result_var),
-            'maximized': copy.deepcopy(result_var)
+            'maximized': copy.deepcopy(result_var),
+            'baseline' : [0 for _ in range(self.data['n_timestamps'])]
         }
 
     def __init_data(self):
@@ -98,18 +99,6 @@ class Solver:
 
     def __model_parameters_setup(self):
         if self.data['n_pv'] > 0:
-
-            def trasform(profile):
-                print(type(profile))
-                res = []
-                for p in profile:
-                    if p < 0:
-                        res.append(p*-1)
-                    else:
-                        res.append(p)
-                print(type(res))
-                return np.array(res)
-
             self.add_data_field(field_name='pv_profiles', data=[p.profile for p in self.pv_array])
             self.add_data_field(field_name='pv_min_shift', data=[p.min_shift for p in self.pv_array])
             self.add_data_field(field_name='pv_max_shift', data=[p.max_shift for p in self.pv_array])
@@ -148,6 +137,12 @@ class Solver:
             self.add_data_field(field_name='storage_charge_efficiency', data=st.charge_efficiency)
             self.add_data_field(field_name='storage_discharge_efficiency', data=st.discharge_efficiency)
 
+    def get_baseline(self):
+        baseline_list = []
+        [baseline_list.append(p.profile) for p in self.__profiles]
+        baseline_total = [sum(x) for x in zip(*baseline_list)]
+        return baseline_total
+
     def resolve(self, model_resolve_method: ModelResolveMethod, print_results=False, tee=True, pprint=False):
 
         if len(self.__profiles) == 0:
@@ -156,6 +151,7 @@ class Solver:
             self.__setup_data()
 
         instance = self.__model.create_instance(self.__data_for_instance)
+        self.results['baseline'] = self.get_baseline()
 
         if model_resolve_method == ModelResolveMethod.MINIMIZE:
 
@@ -188,6 +184,7 @@ class Solver:
                 print('Optimal solution - maximized: %5.2f' % self.results['maximized']['solution_value'])
                 print('Time - minimized: {}'.format(self.results['minimized']['time']))
                 print('Time - maximized: {}'.format(self.results['maximized']['time']))
+
 
     def __resolve_model_and_results(self, model_resolve_method, instance, tee, pprint):
 

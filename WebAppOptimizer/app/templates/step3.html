@@ -77,7 +77,7 @@
 
 
 
-        <form method="POST" action="{{ url_for('main.save_config') }}">
+        <form method="POST" action="{{ url_for('core.save_config') }}">
         {{ form.hidden_tag() }}
             {{ form.body.hidden_tag() }}
             {% for field in form.body %}

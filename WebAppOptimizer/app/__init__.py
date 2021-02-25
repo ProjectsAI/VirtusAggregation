@@ -47,7 +47,7 @@ def create_app(config_class=Config):
     from WebAppOptimizer.app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
-    from WebAppOptimizer.app.main import bp as main_bp
+    from WebAppOptimizer.app.core import bp as main_bp
     app.register_blueprint(main_bp)
 
     if not app.debug and not app.testing:
