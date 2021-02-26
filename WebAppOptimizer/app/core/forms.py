@@ -68,8 +68,14 @@ class GetFromLibraForm(FlaskForm):
     table_title = StringField('Date')
     rows = FieldList(FormField(GetFromLibraResultForm))
 
+class AggregatedOptimizationResultForm(FlaskForm):
+    single = StringField('Single PODs')
+    mixed = StringField('Mixed PODs')
+    local_time = StringField('Time for Local Optimizations (s)')
+    aggr_time = StringField('Time for Aggregated Optimizations (s)')
+    tot_time = StringField('Total Optimization Time (s)')
 
-class OptimizationResultForm(FlaskForm):
+class LocalOptimizationResultForm(FlaskForm):
     configuration = StringField('Configuration')
     composition = StringField('Composition')
     min_time = StringField('Time for minimization(s)')
@@ -82,4 +88,5 @@ class OptimizationForm(FlaskForm):
     submit2 = SubmitField(_l('Aggregate'))
     textarea = TextAreaField(_l(''), render_kw={'class': 'form-control', 'rows': 5})
     table_title = StringField('Date')
-    rows = FieldList(FormField(OptimizationResultForm))
+    local_rows = FieldList(FormField(LocalOptimizationResultForm))
+    aggr_rows = FieldList(FormField(AggregatedOptimizationResultForm))

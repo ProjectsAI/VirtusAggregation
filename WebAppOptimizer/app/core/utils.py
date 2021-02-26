@@ -6,7 +6,8 @@ import base64
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
-from WebAppOptimizer.app.core.forms import OptimizationResultForm, GetFromLibraResultForm
+from WebAppOptimizer.app.core.forms import GetFromLibraResultForm, LocalOptimizationResultForm, \
+    AggregatedOptimizationResultForm
 
 matplotlib.use('Agg')
 
@@ -15,6 +16,48 @@ plants = ['PONTLAB_1', 'PONTLAB_2', 'PV_1', "PV_2", "WIND_1", "WIND_2", 'BESS_1'
 
 
 ##########################   UTILS   ##################################
+def get_opt_time(form, local, aggregated, resolve_method='maximized'):
+    n_single = 0
+    n_mixed = 0
+    local_opt_times = []
+
+    total_local_time = 0
+
+    aggr = AggregatedOptimizationResultForm()
+
+    for e in local['data']['optimizations']:
+        local_opt_times.append('-') if isinstance(e['minimized']['time'], str) else local_opt_times.append(
+            round(e['minimized']['time'], 2))
+        local_opt_times.append('-') if isinstance(e['maximized']['time'], str) else local_opt_times.append(
+            round(e['maximized']['time'], 2))
+
+    for e in local_opt_times:
+        if e == '-':
+            n_single += 1
+        else:
+            n_mixed += 1
+            total_local_time += e
+
+    aggr.single = int(n_single/2)
+    aggr.mixed = int(n_mixed/2)
+    aggr.local_time = round(total_local_time, 2)
+    aggr.aggr_time = round(aggregated[resolve_method]['time'], 2)
+    aggr.tot_time = aggr.local_time + aggr.aggr_time
+
+    form.aggr_rows.append_entry(aggr)
+
+
+def render_opt_result_table(form, data):
+    form.table_title.data = 'Optimization for Date:\t' + data['data']['date']
+
+    for e in data['data']['optimizations']:
+        row = LocalOptimizationResultForm()
+        row.configuration = e['name']
+        row.composition = e['composition']
+        row.min_time = '-' if isinstance(e['minimized']['time'], str) else round(e['minimized']['time'], 2)
+        row.max_time = '-' if isinstance(e['maximized']['time'], str) else round(e['maximized']['time'], 2)
+
+        form.local_rows.append_entry(row)
 
 
 def plot_results(result, resolve_method='maximized', side_by_side=False):
@@ -169,19 +212,6 @@ def extract_max_col_width(elements):
         comp_w = len(e['composition']) if len(e['composition']) > comp_w else comp_w
 
     return name_w, comp_w
-
-
-def render_opt_result_table(form, data):
-    form.table_title.data = 'Optimization for Date:\t' + data['data']['date']
-
-    for e in data['data']['optimizations']:
-        row = OptimizationResultForm()
-        row.configuration = e['name']
-        row.composition = e['composition']
-        row.min_time = '-' if isinstance(e['minimized']['time'], str) else round(e['minimized']['time'], 2)
-        row.max_time = '-' if isinstance(e['maximized']['time'], str) else round(e['maximized']['time'], 2)
-
-        form.rows.append_entry(row)
 
 
 def search_by_name(name, dictlist):

@@ -32,14 +32,14 @@
             <div>
                 <p>
                     <table class="table table-striped">
-                        <b>{{ form.table_title.data }}<b>
+                        <b>{{ form.table_title.data }}</b>
                         <tr>
                             <th> Configuration </th>
                             <th> Composition </th>
                             <th> Time for minimization(s) </th>
                             <th> Time for maximization(s) </th>
                         </tr>
-                        {% for row in form.rows %}
+                        {% for row in form.local_rows %}
                         <tr>
                             <td>{{ row.configuration.data }}</td>
                             <td>{{ row.composition.data }}</td>
@@ -61,10 +61,35 @@
             <div id="loading2" style="display:none;">
                 <img src="loading.gif" alt="Loading!" />
             </div>
+            <div>
+                <p>
+                    <table class="table table-striped">
+                        <b>{{ form.table_title.data }}<b>
+                        <tr>
+                            <th> Single PODs </th>
+                            <th> Mixed PODs </th>
+                            <th> Time for Local Optimization (s) </th>
+                            <th> Time for Aggregated Optimization (s) </th>
+                            <th> Total (s) </th>
+                        </tr>
+                        {% for row in form.aggr_rows %}
+                        <tr>
+                            <td>{{ row.single.data }}</td>
+                            <td>{{ row.mixed.data }}</td>
+                            <td>{{ row.local_time.data }}</td>
+                            <td>{{ row.aggr_time.data }}</td>
+                            <td>{{ row.tot_time.data }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </p>
+            </div>
             <br>
+            <div>
             {% for img in images %}
                 <img src="{{ img }}"/>
             {% endfor %}
+            </div>
         </form>
         <div class="row">
             <ul class="list-inline pull-right">
@@ -73,58 +98,3 @@
         </div>
     </div>
 {% endblock %}
-
-
-
-        <form method="POST" action="{{ url_for('core.save_config') }}">
-        {{ form.hidden_tag() }}
-            {{ form.body.hidden_tag() }}
-            {% for field in form.body %}
-                {% if field.widget.input_type != 'hidden' %}
-                <div class="row">
-                    <p>
-                        <div class="col-md-1">
-                            <b>{{ field.label }}</b>
-                        </div>
-                        <div class="col-md-2">
-                            {{ field(min=0, max=10, step=1, class="border-0", oninput="javascript:valueSpanUpdate(id, value)")}}
-                        </div>
-                        <div class="col-md-2">
-                            <span class="font-weight-bold text-primary ml-2 mt-1" id="value{{ field.id }}">{{ field.data }}</span>
-                        </div>
-                    </p>
-                </div>
-                {% endif %}
-            {% endfor %}
-                <p>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label for="example-date-input" class="col-2 col-form-label">Enter Date</label>
-                            {{ form.date(class="form-control", required=true) }}
-                        </div>
-                    </div>
-                </p>
-                <br>
-                <p>
-                    <div class="row">
-                        <div class="col-md-2">
-                            {{ form.remember_conf(onchange="javascript:hideConfname(form.confname.id, checked)") }}
-                            {{ form.remember_conf.label }}
-                        </div>
-                    </div>
-                </p>
-                <p>
-                    <div class="row">
-                        <div class="col-md-2">
-                            {{ form.confname(hidden=True, placeholder='Configuration Name') }}
-                        </div>
-                    </div>
-                </p>
-                <p>
-                    <div class="row">
-                            <ul class="list-inline pull-right">
-                                <li>{{ form.submit(class="btn btn-primary btn-info-full next-step", value="Save and continue") }}</li>
-                            </ul>
-                    </div>
-                </p>
-        </form>

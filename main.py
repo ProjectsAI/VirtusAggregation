@@ -31,34 +31,6 @@ def print_graph(plant, title=''):
     plt.show()
 
 
-def plot_results(result, resolve_method='maximized', print_costs=True):
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility Results')
-    plt.xticks(range(0, 96, 5))
-
-    ax.plot(result[resolve_method]['baseline'], label='baseline (' + resolve_method + ')', color='#bcbd22', linewidth=1)
-    ax.plot(result[resolve_method]['F_max'], label='F_max_opt (' + resolve_method + ')', color='#ff7f0e')
-    ax.plot(result[resolve_method]['F_min'], label='F_min_opt (' + resolve_method + ')', color='#1f77b4')
-
-    plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
-    plt.show()
-
-    if print_costs:
-        fig, ax = plt.subplots(figsize=(8, 4))
-        ax.set(xlabel='Cost', ylabel='Cost', title='Aggregated Cost Results')
-        plt.xticks(range(0, 96, 5))
-
-        # ax.plot(result[resolve_method]['Gain_max'], label='Gain_max (' + resolve_method + ')')
-        # ax.plot(result[resolve_method]['Gain_min'], label='Gain_min (' + resolve_method + ')')
-        ax.plot([x * y for x, y in zip(result[resolve_method]['Gain_max'], result[resolve_method]['F_max'])],
-                label='Gain_max (' + resolve_method + ')', color='#ff7f0e')
-        ax.plot([x * y for x, y in zip(result[resolve_method]['Gain_min'], result[resolve_method]['F_min'])],
-                label='Gain_min (' + resolve_method + ')', color='#1f77b4')
-
-        plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
-        plt.show()
-
-
 ####################################################################################
 np.random.seed(10)
 
@@ -277,7 +249,7 @@ p7.set_profiles(
 ########################################################################################
 
 solver_method = ModelResolveMethod.MINIMIZE_AND_MAXIMIZE
-p1.resolve(print_results=True, print_graphs=True, tee=False, pprint=False, per_allegra=False) # OK
+# p1.resolve(print_results=True, print_graphs=True, tee=False, pprint=False, per_allegra=False)  # OK
 # p2.resolve(print_results=True, print_graphs=True, tee=False, pprint=False, per_allegra=False) # OK
 # p3.resolve(print_results=True, print_graphs=True, tee=False, pprint=False, per_allegra=False) # OK
 # p4.resolve(print_results=True, print_graphs=True, tee=False, pprint=False, per_allegra=False)
@@ -325,9 +297,21 @@ test_configuration = [p_pv1] * n_p_pv1 + [p_pv2] * n_p_pv2 + \
 
 aggregator.set_pods(test_configuration)
 
-print_aggregator_results = True
-print_costs = True
+aggregator.resolve_pods_and_aggregate()
 
-result = aggregator.resolve_pods_and_aggregate()
-if print_aggregator_results:
-    plot_results(result['optimizations'], print_costs=print_costs, resolve_method='maximized')
+# plot
+n_pods = [10, 20, 30, 60, 100, 140, 200]
+tot_opt_time = [0.072, 3.29, 3.63, 8.68, 14.92, 27.75, 31.65]
+
+
+def plot_results(pods, time):
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.set(xlabel='Number of PODs', ylabel='Total Optimization Time (s)', title='Performance of the Model')
+
+    ax.plot(pods,time)
+
+    plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+    plt.show()
+
+
+plot_results(n_pods, tot_opt_time)

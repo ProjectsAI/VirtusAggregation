@@ -143,7 +143,7 @@ class Solver:
         baseline_total = [sum(x) for x in zip(*baseline_list)]
         return baseline_total
 
-    def resolve(self, model_resolve_method: ModelResolveMethod, print_results=False, tee=True, pprint=False):
+    def resolve(self, model_resolve_method: ModelResolveMethod, print_results=False, tee=False, pprint=False):
 
         if len(self.__profiles) == 0:
             raise Exception('Profiles not provided!')

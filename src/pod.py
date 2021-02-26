@@ -80,7 +80,7 @@ class Pod(object):
 
         self.solver.resolve(model_resolve_method, print_results, tee, pprint)
         self.__fix_flexibility_bounds()
-        self.__fix_baseline()
+        #self.__fix_baseline()
 
         if print_graphs:
             if model_resolve_method == ModelResolveMethod.MINIMIZE:
