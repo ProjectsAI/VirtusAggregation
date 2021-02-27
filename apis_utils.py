@@ -2,6 +2,7 @@ import os
 from operator import itemgetter
 
 from src.bess import Bess
+from src.chp import CHP
 from src.load import LoadT1, LoadT2, LoadT3
 from src.pod import Pod
 from src.pontlab import Pontlab
@@ -20,36 +21,6 @@ platform = {
     'uvams': [
         {'id': 27,
          'plants': [
-             {'id': 1041,
-              'name': 'PONTLAB_1',
-              'type': 'PONTLAB',
-              'description': 'Trigeneration Plant',
-              'components': [
-                  {'id': 1041,
-                   'name': 'PONTLAB_1',
-                   'type': 'PONTLAB',
-                   'baseline': None}
-              ]},
-             {'id': 1042,
-              'name': 'PONTLAB_2',
-              'type': 'PONTLAB',
-              'description': 'Trigeneration Plant',
-              'components': [
-                  {'id': 1042,
-                   'name': 'PONTLAB_2',
-                   'type': 'PONTLAB',
-                   'baseline': None}
-              ]},
-             {'id': 1043,
-              'name': 'LOAD_4',
-              'type': 'LOAD_T3',
-              'description': 'Type 3 Load - [shift - loss]',
-              'components': [
-                  {'id': 1043,
-                   'name': 'LOAD_4',
-                   'type': 'LOAD_T3',
-                   'baseline': None}
-              ]},
              {'id': 1044,
               'name': 'PV_1',
               'type': 'PV',
@@ -90,6 +61,16 @@ platform = {
                    'type': 'WIND',
                    'baseline': None}
               ]},
+             {'id': 1054,
+              'name': 'CHP_1',
+              'type': 'CHP',
+              'description': 'Combined Heat and Power Plant',
+              'components': [
+                  {'id': 1054,
+                   'name': 'CHP_1',
+                   'type': 'CHP',
+                   'baseline': None}
+              ]},
              {'id': 1048,
               'name': 'LOAD_1',
               'type': 'LOAD_T2',
@@ -120,6 +101,16 @@ platform = {
                    'type': 'LOAD_T3',
                    'baseline': None}
               ]},
+             {'id': 1043,
+              'name': 'LOAD_4',
+              'type': 'LOAD_T3',
+              'description': 'Type 3 Load - [shift - loss]',
+              'components': [
+                  {'id': 1043,
+                   'name': 'LOAD_4',
+                   'type': 'LOAD_T3',
+                   'baseline': None}
+              ]},
              {'id': 1051,
               'name': 'BESS_1',
               'type': 'BESS',
@@ -138,6 +129,26 @@ platform = {
                   {'id': 1052,
                    'name': 'BESS_2',
                    'type': 'BESS',
+                   'baseline': None}
+              ]},
+             {'id': 1041,
+              'name': 'PONTLAB_1',
+              'type': 'PONTLAB',
+              'description': 'Trigeneration Plant',
+              'components': [
+                  {'id': 1041,
+                   'name': 'PONTLAB_1',
+                   'type': 'PONTLAB',
+                   'baseline': None}
+              ]},
+             {'id': 1042,
+              'name': 'PONTLAB_2',
+              'type': 'PONTLAB',
+              'description': 'Trigeneration Plant',
+              'components': [
+                  {'id': 1042,
+                   'name': 'PONTLAB_2',
+                   'type': 'PONTLAB',
                    'baseline': None}
               ]},
              {'id': 1000,
@@ -163,7 +174,7 @@ platform = {
                    'name': 'PV_1',
                    'type': 'PV',
                    'baseline': None},
-                  {'id': 1055,
+                  {'id': 1053,
                    'name': 'STORAGE_2',
                    'type': 'SIMPLE_STORAGE',
                    'baseline': None},
@@ -181,7 +192,7 @@ platform = {
                    'name': 'PV_1',
                    'type': 'PV',
                    'baseline': None},
-                  {'id': 1055,
+                  {'id': 1053,
                    'name': 'STORAGE_3',
                    'type': 'SIMPLE_STORAGE',
                    'baseline': None},
@@ -203,7 +214,7 @@ platform = {
                    'name': 'PV_1',
                    'type': 'PV',
                    'baseline': None},
-                  {'id': 1055,
+                  {'id': 1053,
                    'name': 'STORAGE_3',
                    'type': 'SIMPLE_STORAGE',
                    'baseline': None},
@@ -223,7 +234,7 @@ platform = {
              {'id': 5000,
               'name': 'CONF_5',
               'type': 'MIX',
-              'description': 'Mixed Configuration - [ 2 PV - 2 WIND - SIMPLE_STORAGE - 1 LOAD_T1 - 3 LOAD_T2 - 2 LOAD_T3 ]',
+              'description': 'Mixed Configuration - [ 2 PV - 2 WIND - 1 CHP - SIMPLE_STORAGE - 1 LOAD_T1 - 3 LOAD_T2 - 2 LOAD_T3 ]',
               'components': [
                   {'id': 1044,
                    'name': 'PV_1',
@@ -241,7 +252,11 @@ platform = {
                    'name': 'WIND_2',
                    'type': 'WIND',
                    'baseline': None},
-                  {'id': 1055,
+                  {'id': 1054,
+                   'name': 'CHP_1',
+                   'type': 'CHP',
+                   'baseline': None},
+                  {'id': 1053,
                    'name': 'STORAGE_3',
                    'type': 'SIMPLE_STORAGE',
                    'baseline': None},
@@ -273,12 +288,8 @@ platform = {
              {'id': 6000,
               'name': 'CONF_6',
               'type': 'MIX',
-              'description': 'Mixed Configuration - [ 3 PV - 3 WIND - SIMPLE_STORAGE - 3 LOAD_T1 - 3 LOAD_T2 - 3 LOAD_T3 ]',
+              'description': 'Mixed Configuration - [ 2 PV - 3 WIND - SIMPLE_STORAGE - 3 LOAD_T1 - 3 LOAD_T2 - 3 LOAD_T3 ]',
               'components': [
-                  {'id': 1044,
-                   'name': 'PV_1',
-                   'type': 'PV',
-                   'baseline': None},
                   {'id': 1044,
                    'name': 'PV_1',
                    'type': 'PV',
@@ -299,7 +310,7 @@ platform = {
                    'name': 'WIND_2',
                    'type': 'WIND',
                    'baseline': None},
-                  {'id': 1055,
+                  {'id': 1053,
                    'name': 'STORAGE_3',
                    'type': 'SIMPLE_STORAGE',
                    'baseline': None},
@@ -343,7 +354,7 @@ platform = {
              {'id': 7000,
               'name': 'CONF_7',
               'type': 'MIX',
-              'description': 'Mixed Configuration - [ 5 PV - 5 WIND - SIMPLE_STORAGE - 3 LOAD_T1 - 5 LOAD_T2 - 5 LOAD_T3 ]',
+              'description': 'Mixed Configuration - [ 3 PV - 5 WIND - SIMPLE_STORAGE - 3 LOAD_T1 - 5 LOAD_T2 - 5 LOAD_T3 ]',
               'components': [
                   {'id': 1044,
                    'name': 'PV_1',
@@ -357,14 +368,6 @@ platform = {
                    'name': 'PV_1',
                    'type': 'PV',
                    'baseline': None},
-                  {'id': 1044,
-                   'name': 'PV_1',
-                   'type': 'PV',
-                   'baseline': None},
-                  {'id': 1044,
-                   'name': 'PV_1',
-                   'type': 'PV',
-                   'baseline': None},
                   {'id': 1046,
                    'name': 'WIND_1',
                    'type': 'WIND',
@@ -385,7 +388,7 @@ platform = {
                    'name': 'WIND_2',
                    'type': 'WIND',
                    'baseline': None},
-                  {'id': 1055,
+                  {'id': 1053,
                    'name': 'STORAGE_3',
                    'type': 'SIMPLE_STORAGE',
                    'baseline': None},
@@ -495,11 +498,14 @@ def load_baseline(tmp, date):
 def load_profile(element):
     profile = None
     if element['type'] == 'PV':
-        profile = PV(np.array(element['baseline']))
+        if element['name'] == 'PV_2':
+            profile = PV(np.array(element['baseline']), scale_factor=0.1)
+        else:
+            profile = PV(np.array(element['baseline']))
     if element['type'] == 'WIND':
         profile = Wind(np.array(element['baseline']))
     if element['type'] == 'CHP':
-        profile = None
+        profile = CHP(np.array(element['baseline']), [x for x in list(range(0, 96)) if x not in list(range(0, 20))])  # max(kW) = 0.8 - day: center
     if element['type'] == 'BESS':
         profile = Bess(np.array(element['baseline']))
     if element['type'] == 'PONTLAB':
@@ -513,11 +519,11 @@ def load_profile(element):
     if element['type'] == 'LOAD_T3':
         if element['name'] == 'LOAD_4':
             profile = LoadT3(np.array(element['baseline']),
-                             [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 15)  # [shift - loss]
+                             [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 20)  # [shift - loss]
         else:
             profile = LoadT3(np.array(element['baseline']),
-                             [x for x in list(range(0, 96)) if x not in list(range(15, 25))],
-                             0)  # [shift - no_loss]
+                             [x for x in list(range(0, 96)) if x not in list(range(50, 70))],
+                             10)  # [shift - no_loss]
     return profile
 
 

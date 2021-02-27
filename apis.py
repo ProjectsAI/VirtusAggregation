@@ -33,7 +33,7 @@ def get_info(uvamId):
 def read_profiles(uvamId):
     config = request.json
     plants = {'data': [],
-              'date': '2020-11-05'  # config['date']
+              'date': '2020-11-01'  # config['date']
               }
     uvam = get_uvam_by_id(uvamId)
     for x in config['plants']:

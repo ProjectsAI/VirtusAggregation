@@ -34,19 +34,19 @@
                         {% if field.type == 'IntegerRangeField' %}
                         <tr>
                             <td>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <b>{{ field.label }}</b>
                                 </div>
-                                <div class="col-md-5">
+                                <div class="col-md-6">
                                     {{ field(min=0, max=20, step=1, class="border-0", oninput="javascript:valueSpanUpdate(id, value)")}}
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-1">
                                     <span class="font-weight-bold text-primary ml-2 mt-1" id="value{{ field.id }}">{{ field.data }}</span>
                                 </div>
                             </td>
 
                             <td>
-                              <div class="col-md-12">
+                              <div class="col-md-13">
                                   {{ field.description }}
                               </div>
                             </td>

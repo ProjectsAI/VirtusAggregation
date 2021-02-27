@@ -144,7 +144,7 @@ def third_step():
             session['aggregated_opt_result_data'] = result
 
             images = plot_results(result['data']['optimizations'])
-            opt_time = get_opt_time(form, to_aggregate, result['data']['optimizations'])
+            get_opt_time(form, to_aggregate, result['data']['optimizations'])
 
             return render_template('step3.html', title=_('Step 3'), form=form, images=images,
                                    prev_url=prev_url)

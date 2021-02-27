@@ -35,7 +35,7 @@ def print_graph(plant, title=''):
 np.random.seed(10)
 
 scale_factor = 1
-date = '2020-11-01'
+date = '2020-11-15'
 
 pontlab1_test = np.load('Baseline/' + date + '.uvax.27.plants.1041.profile.baseline.npy')
 pontlab2_test = np.load('Baseline/' + date + '.uvax.27.plants.1042.profile.baseline.npy')
@@ -49,7 +49,7 @@ load2_test = np.load('Baseline/' + date + '.uvax.27.plants.1049.profile.baseline
 load3_test = np.load('Baseline/' + date + '.uvax.27.plants.1050.profile.baseline.npy')
 bess1_test = np.load('Baseline/' + date + '.uvax.27.plants.1051.profile.baseline.npy')
 bess2_test = np.load('Baseline/' + date + '.uvax.27.plants.1052.profile.baseline.npy')
-chp1_test = np.load('Baseline/' + date + '.uvax.27.plants.1041.profile.baseline.npy')
+chp1_test = np.load('Baseline/' + date + '.uvax.27.plants.1054.profile.baseline.npy')
 
 plot_tests = False
 ########################################################################################
@@ -60,8 +60,7 @@ plot_tests = False
 # PV
 pv1 = PV(pv1_test)  # max(kW) = 10 - day: center
 pv2 = PV(pv2_test)  # max(kW) = 20 - day: center
-p_pv1 = Pod()
-p_pv1.add_profile(pv1)
+p_pv1 = Pod(pv1)
 p_pv2 = Pod(pv2)
 
 # WIND
@@ -70,8 +69,9 @@ wind2 = Wind(wind2_test)  # max(kW) = 0.8 - day: left
 p_wind1 = Pod(wind1)
 p_wind2 = Pod(wind2)
 # CHP
-# chp1 = CHP(chp1_test)  # max(kW) = +-4
-# p_chp1 = Pod(chp1)
+chp1 = CHP(chp1_test, [x for x in list(range(0, 96)) if x not in list(range(0, 20))])  # max(kW) = 0.8 - day: center
+p_chp1 = Pod(pv1)
+# print_graph(chp1)
 
 # BESS
 bess1 = Bess(bess1_test)  # max(kW) = +-4
@@ -88,10 +88,10 @@ p_pontlab2 = Pod(pontlab2)
 # LOAD
 load1 = LoadT1(load2_test)  # max(kW) = 0.0012 [no_shift - no_loss]
 load2 = LoadT2(load1_test, list(range(0, 96)), 20)  # max(kW) = 0.06 [no_shift - loss]
-load3 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(0, 20))],
-               0)  # max(kW) = 12 [shift - no_loss]
-load4 = LoadT3(load4_test, [x for x in list(range(0, 96)) if x not in list(range(55, 60))],
-               10)  # max(kW) = 11 [shift - loss]
+load3 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))],
+               1)  # max(kW) = 12 [shift - no_loss]
+load4 = LoadT3(load4_test, [x for x in list(range(0, 96)) if x not in list(range(30, 45))],
+               15)  # max(kW) = 11 [shift - loss]
 p_load1 = Pod(load1)
 p_load2 = Pod(load2)
 p_load3 = Pod(load3)
@@ -120,7 +120,7 @@ if plot_tests:
 #  CONF_2: 1PV,1St,            1L3
 #  CONF_3: 1PV,1St,            1L2,1L3
 #  CONF_4: 1PV,1wind,1St,      2L2,1L3
-#  CONF_5: 2PV,2wind,1St,      1L1,3L2,2L3
+#  CONF_5: 2PV,2wind,1chp,1St,      1L1,3L2,2L3
 #  CONF_6: 3PV,3wind,1St,      3l1,3L2,3L3
 #  CONF_7: 5PV,5wind,1St,      3l1,5L2,5L3
 ########################################################################################
@@ -129,23 +129,23 @@ if plot_tests:
 p1 = Pod()
 p1_wind_1 = Wind(wind1_test)
 
-p1_l2_1 = LoadT2(load1_test, list(range(0, 96)), 10)  # [no_shift - loss]
+p1_l2_1 = LoadT2(load1_test, list(range(0, 96)), 25)  # [no_shift - loss]
 p1.set_profiles([p1_wind_1, p1_l2_1])
 
 ########################################################################################
 # CONF_2    ->     [1 PV / 1 St / 1 L3 ]
 p2 = Pod()
 p2_pv_1 = PV(pv1_test)
-p2_st = SimpleStorage(1000)
+p2_st = SimpleStorage(70)
 
-p2_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 0)  # [shift - no_loss]
+p2_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 1)  # [shift - no_loss]
 p2.set_profiles([p2_pv_1, p2_st,
                  p2_l3_1])
 ########################################################################################
 # CONF_3    ->     [1 PV / 1 St / 1 L2 / 1 L3 ]
 p3 = Pod()
 p3_pv_1 = PV(pv1_test)
-p3_st = SimpleStorage(5000)
+p3_st = SimpleStorage(70)
 
 p3_l2_1 = LoadT2(load1_test, list(range(0, 96)), 25)  # [no_shift - loss]
 p3_l4_1 = LoadT3(load4_test, [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 15)  # [shift - loss]
@@ -157,30 +157,32 @@ p3.set_profiles([p3_pv_1, p3_st,
 p4 = Pod()
 p4_pv_1 = PV(pv1_test)  # max(kW) = 10 - day: center
 p4_wind_1 = Wind(wind1_test)  # max(kW) = 0.4 - day: center
-p4_st = SimpleStorage(5000)
+p4_st = SimpleStorage(70)
 
-p4_l2_1 = LoadT2(load1_test, list(range(0, 96)), 10)  # max(kW) = 0.0012 [no_shift - loss]
-p4_l2_2 = LoadT2(load1_test, list(range(0, 96)), 10)  # max(kW) = 0.0012 [no_shift - loss]
-p4_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 0)  # [shift - no_loss]
+p4_l2_1 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p4_l2_2 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p4_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 1)  # [shift - no_loss]
 p4.set_profiles([p4_pv_1, p4_wind_1, p4_st,
                  p4_l2_1, p4_l2_2,
                  p4_l3_1])
 ########################################################################################
-# CONF_5    ->     [2 PV / 2 WIND / 1 ST / 1 L1 / 3 L2 / 2 L3 (l4)]
+# CONF_5    ->     [2 PV / 2 WIND / 1 CHP / 1 ST / 1 L1 / 3 L2 / 2 L3 (l4)]
 p5 = Pod()
 p5_pv_1 = PV(pv1_test)  # max(kW) = 10 - day: center
 p5_pv_2 = PV(pv1_test)  # max(kW) = 10 - day: center
 p5_wind_1 = Wind(wind1_test)  # max(kW) = 0.4 - day: center
 p5_wind_2 = Wind(wind2_test)  # max(kW) = 0.8 - day: center
-p5_st = SimpleStorage(7000)
+p5_chp_1 = CHP(chp1_test,
+                [x for x in list(range(0, 96)) if x not in list(range(0, 20))])  # max(kW) = 0.8 - day: center
+p5_st = SimpleStorage(70)
 
 p5_l1_1 = LoadT1(load2_test)  # max(kW) = 0.06 [no_shift - no_loss]
-p5_l2_1 = LoadT2(load1_test, list(range(0, 96)), 10)  # max(kW) = 0.0012 [no_shift - loss]
-p5_l2_2 = LoadT2(load1_test, list(range(0, 96)), 15)  # max(kW) = 0.0012 [no_shift - loss]
-p5_l2_3 = LoadT2(load1_test, list(range(0, 96)), 20)  # max(kW) = 0.0012 [no_shift - loss]
-p5_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 0)  # [shift - no_loss]
+p5_l2_1 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p5_l2_2 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p5_l2_3 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p5_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 1)  # [shift - no_loss]
 p5_l3_2 = LoadT3(load4_test, [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 15)  # [shift - loss]
-p5.set_profiles([p5_pv_1, p5_pv_2, p5_wind_1, p5_wind_2, p5_st,
+p5.set_profiles([p5_pv_1, p5_pv_2, p5_wind_1, p5_wind_2, p5_chp_1, p5_st,
                  p5_l1_1,
                  p5_l2_1, p5_l2_2, p5_l2_3,
                  p5_l3_1, p5_l3_2
@@ -195,15 +197,15 @@ p6_pv_3 = PV(pv1_test)  # max(kW) = 10 - day: center
 p6_wind_1 = Wind(wind1_test)  # max(kW) = 0.4 - day: center
 p6_wind_2 = Wind(wind1_test)  # max(kW) = 0.4 - day: center
 p6_wind_3 = Wind(wind2_test)  # max(kW) = 0.8 - day: center
-p6_st = SimpleStorage(5000)
+p6_st = SimpleStorage(70)
 
 p6_l1_1 = LoadT1(load2_test)  # max(kW) = 0.06 [no_shift - no_loss]
 p6_l1_2 = LoadT1(load2_test)  # max(kW) = 0.06 [no_shift - no_loss]
 p6_l1_3 = LoadT1(load2_test)  # max(kW) = 0.06 [no_shift - no_loss]
-p6_l2_1 = LoadT2(load1_test, list(range(0, 96)), 10)  # max(kW) = 0.0012 [no_shift - loss]
-p6_l2_2 = LoadT2(load1_test, list(range(0, 96)), 10)  # max(kW) = 0.0012 [no_shift - loss]
-p6_l2_3 = LoadT2(load1_test, list(range(0, 96)), 10)  # max(kW) = 0.0012 [no_shift - loss]
-p6_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 0)  # [shift - no_loss]
+p6_l2_1 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p6_l2_2 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p6_l2_3 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p6_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 1)  # [shift - no_loss]
 p6_l3_2 = LoadT3(load4_test, [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 15)  # [shift - loss]
 p6_l3_3 = LoadT3(load4_test, [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 15)  # [shift - loss]
 p6.set_profiles([p6_pv_1, p6_pv_2, p6_pv_3, p6_wind_1, p6_wind_2, p6_wind_3, p6_st,
@@ -225,19 +227,19 @@ p7_wind_2 = Wind(wind1_test)  # max(kW) = 0.4 - day: center
 p7_wind_3 = Wind(wind2_test)  # max(kW) = 0.8 - day: center
 p7_wind_4 = Wind(wind2_test)  # max(kW) = 0.8 - day: center
 p7_wind_5 = Wind(wind2_test)  # max(kW) = 0.8 - day: center
-p7_st = SimpleStorage(10000)
+p7_st = SimpleStorage(70)
 
 p7_l1_1 = LoadT1(load2_test)  # max(kW) = 0.06 [no_shift - no_loss]
 p7_l1_2 = LoadT1(load2_test)  # max(kW) = 0.06 [no_shift - no_loss]
 p7_l1_3 = LoadT1(load2_test)  # max(kW) = 0.06 [no_shift - no_loss]
-p7_l2_1 = LoadT2(load1_test, list(range(0, 96)), 10)  # max(kW) = 0.0012 [no_shift - loss]
-p7_l2_2 = LoadT2(load1_test, list(range(0, 96)), 10)  # max(kW) = 0.0012 [no_shift - loss]
-p7_l2_3 = LoadT2(load1_test, list(range(0, 96)), 15)  # max(kW) = 0.0012 [no_shift - loss]
-p7_l2_4 = LoadT2(load1_test, list(range(0, 96)), 20)  # max(kW) = 0.0012 [no_shift - loss]
-p7_l2_5 = LoadT2(load1_test, list(range(0, 96)), 20)  # max(kW) = 0.0012 [no_shift - loss]
-p7_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 0)  # [shift - no_loss]
-p7_l3_2 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 0)  # [shift - no_loss]
-p7_l3_3 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 0)  # [shift - no_loss]
+p7_l2_1 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p7_l2_2 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p7_l2_3 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p7_l2_4 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p7_l2_5 = LoadT2(load1_test, list(range(0, 96)), 25)  # max(kW) = 0.0012 [no_shift - loss]
+p7_l3_1 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 1)  # [shift - no_loss]
+p7_l3_2 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 1)  # [shift - no_loss]
+p7_l3_3 = LoadT3(load3_test, [x for x in list(range(0, 96)) if x not in list(range(15, 25))], 1)  # [shift - no_loss]
 p7_l3_4 = LoadT3(load4_test, [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 15)  # [shift - loss]
 p7_l3_5 = LoadT3(load4_test, [x for x in list(range(0, 96)) if x not in list(range(30, 45))], 15)  # [shift - loss]
 p7.set_profiles(
@@ -265,31 +267,31 @@ solver_method = ModelResolveMethod.MINIMIZE_AND_MAXIMIZE
 
 aggregator = Aggregator()
 
-n_p_pv1 = 0
+n_p_pv1 = 5
 n_p_pv2 = 0
-n_p_wind1 = 0
+n_p_wind1 = 5
 n_p_wind2 = 0
-n_p_chp1 = 0
+n_p_chp1 = 2
 n_p_bess1 = 0
-n_p_bess2 = 0
+n_p_bess2 = 10
 n_p_pontlab1 = 0
 n_p_pontlab2 = 0
 n_p_load1 = 0
-n_p_load2 = 0
-n_p_load3 = 0
-n_p_load4 = 0
+n_p_load2 = 4
+n_p_load3 = 2
+n_p_load4 = 2
 
 n_p1 = 0
 n_p2 = 0
-n_p3 = 0
-n_p4 = 0
+n_p3 = 2
+n_p4 = 3
 n_p5 = 0
 n_p6 = 0
-n_p7 = 1
+n_p7 = 5
 
-# [p_chp1] * n_p_chp1 + \
 test_configuration = [p_pv1] * n_p_pv1 + [p_pv2] * n_p_pv2 + \
                      [p_wind1] * n_p_wind1 + [p_wind2] * n_p_wind2 + \
+                     [p_chp1] * n_p_chp1 + \
                      [p_bess1] * n_p_bess1 + [p_bess2] * n_p_bess2 + \
                      [p_pontlab1] * n_p_pontlab1 + [p_pontlab2] * n_p_pontlab2 + \
                      [p_load1] * n_p_load1 + [p_load2] * n_p_load2 + [p_load3] * n_p_load3 + [p_load4] * n_p_load4 + \
@@ -297,9 +299,10 @@ test_configuration = [p_pv1] * n_p_pv1 + [p_pv2] * n_p_pv2 + \
 
 aggregator.set_pods(test_configuration)
 
-aggregator.resolve_pods_and_aggregate()
+aggregator.resolve_pods_and_aggregate(print_results=True,
+                                      print_graphs=True)
 
-# plot
+# Scaling Analysis plot
 n_pods = [10, 20, 30, 60, 100, 140, 200]
 tot_opt_time = [0.072, 3.29, 3.63, 8.68, 14.92, 27.75, 31.65]
 
@@ -308,10 +311,10 @@ def plot_results(pods, time):
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.set(xlabel='Number of PODs', ylabel='Total Optimization Time (s)', title='Performance of the Model')
 
-    ax.plot(pods,time)
+    ax.plot(pods, time)
 
     plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
     plt.show()
 
 
-plot_results(n_pods, tot_opt_time)
+#plot_results(n_pods, tot_opt_time)

@@ -119,17 +119,19 @@ class Aggregator(object):
             "We lacked patience and got a multiprocessing.TimeoutError"
 
     # RESOLVE AND AGGREGATE METHODS
-    def resolve_pods_and_aggregate(self):
+    def resolve_pods_and_aggregate(self,print_results=False,
+                  print_graphs=False):
         for pod in self.pods:
             if pod.needs_local_optimization():
                 pod.resolve()
-        return self.aggregate()
+        return self.aggregate(print_results=print_results,
+                  print_graphs=print_graphs)
 
     # AGGREGATE METHODS
 
     # New Aggregator -  optimization model
     def aggregate(self, model_resolve_method=ModelResolveMethod.MAXIMIZE, print_results=True,
-                  print_graphs=True, plot_costs=True, tee=False, pprint=False, per_allegra=False):
+                  print_graphs=False, plot_costs=True, tee=False, pprint=False, per_allegra=False):
 
         self.__init_input()
         self.resolve_method = model_resolve_method
@@ -158,29 +160,44 @@ class Aggregator(object):
 
     def print_graph(self, resolve_method='maximized', costs=True):
         fig, ax = plt.subplots(figsize=(8, 4))
-        ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility Results')
+        ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility')
         plt.xticks(range(0, 96, 5))
 
-        ax.plot(self.result['optimizations'][resolve_method]['baseline'], label='baseline (' + resolve_method + ')', color='#bcbd22',
+        ax.plot(self.result['optimizations'][resolve_method]['Old_f_max'], label='Flex UB', color='#ff7f0e')
+        ax.plot(self.result['optimizations'][resolve_method]['Old_f_min'], label='Flex LB', color='#1f77b4')
+        ax.plot(self.result['optimizations'][resolve_method]['baseline'], label='Baseline', color='#bcbd22',
                 linewidth=1)
-        ax.plot(self.result['optimizations'][resolve_method]['F_max'], label='F_max_opt (' + resolve_method + ')', color='#ff7f0e')
-        ax.plot(self.result['optimizations'][resolve_method]['F_min'], label='F_min_opt (' + resolve_method + ')', color='#1f77b4')
+
+        plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
+        plt.show()
+
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.set(xlabel='Time', ylabel='Active Power (kW)', title='Aggregated Flexibility Optimized')
+        plt.xticks(range(0, 96, 5))
+
+        ax.plot(self.result['optimizations'][resolve_method]['F_max'], label='Optimized Flex UB', color='#ff7f0e')
+        ax.plot(self.result['optimizations'][resolve_method]['F_min'], label='Optimized Flex LB', color='#1f77b4')
+        ax.plot(self.result['optimizations'][resolve_method]['baseline'], label='Baseline (' + resolve_method + ')', color='#bcbd22',
+                linewidth=1)
 
         plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
         plt.show()
 
         if costs:
             fig, ax = plt.subplots(figsize=(8, 4))
-            ax.set(xlabel='Cost', ylabel='Cost', title='Aggregated Cost Results')
+            ax.set(xlabel='Time', ylabel='Cost (€)', title='Aggregated Cost Results')
             plt.xticks(range(0, 96, 5))
 
             # ax.plot(result[resolve_method]['Gain_max'], label='Gain_max (' + resolve_method + ')')
             # ax.plot(result[resolve_method]['Gain_min'], label='Gain_min (' + resolve_method + ')')
-            ax.plot([x * y for x, y in zip(self.result['optimizations'][resolve_method]['Gain_max'], self.result['optimizations'][resolve_method]['F_max'])],
-                    label='Gain_max (' + resolve_method + ')', color='#ff7f0e')
-            ax.plot([x * y for x, y in zip(self.result['optimizations'][resolve_method]['Gain_min'], self.result['optimizations'][resolve_method]['F_min'])],
-                    label='Gain_min (' + resolve_method + ')', color='#1f77b4')
-
+            # ax.plot([x * y for x, y in zip(self.result['optimizations'][resolve_method]['Gain_max'], self.result['optimizations'][resolve_method]['F_max'])],
+            #        label='Gain_max (' + resolve_method + ')', color='#ff7f0e')
+            # ax.plot([x * y for x, y in zip(self.result['optimizations'][resolve_method]['Gain_min'], self.result['optimizations'][resolve_method]['F_min'])],
+            #        label='Gain_min (' + resolve_method + ')', color='#1f77b4')
+            min_gain = [x * y for x, y in zip(self.result['optimizations'][resolve_method]['Gain_min'], self.result['optimizations'][resolve_method]['F_min'])]
+            max_gain = [x * y for x, y in zip(self.result['optimizations'][resolve_method]['Gain_max'], self.result['optimizations'][resolve_method]['F_max'])]
+            ax.plot([(x + y) / 2 for x, y in zip(min_gain, max_gain)],
+                    label='Mean Profit')
             plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)
             plt.show()
 
