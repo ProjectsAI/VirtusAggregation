@@ -27,7 +27,7 @@ class Pod(object):
             else:
                 self.set_profiles([init_list])
 
-    def set_pod_name(self, name):
+    def set_name(self, name):
         self.name = name
 
     def get_composition(self):

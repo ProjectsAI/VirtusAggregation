@@ -23,7 +23,7 @@ class Aggregator(object):
             self.set_pods(pods)
         # self.solver = None
         self.resolve_method = None
-        self.local_optimization_result = None
+        self.local_opt_result = None
         self.input = {
             'baseline': [0] * 96,
             'maximized': {
@@ -47,13 +47,13 @@ class Aggregator(object):
         }
 
     def __init_input(self):
-        if self.local_optimization_result is None:
-            self.local_optimization_result = LocalOptimizationResult()
+        if self.local_opt_result is None:
+            self.local_opt_result = LocalOptimizationResult()
 
-            self.local_optimization_result.populate(self.pods)
+            self.local_opt_result.populate(self.pods)
 
         try:
-            for el in self.local_optimization_result.get_optimizations():
+            for el in self.local_opt_result.get_optimizations():
                 self.input['maximized']['flexibilities'].append(el['maximized']['flexibility'])
                 self.input['minimized']['flexibilities'].append(el['minimized']['flexibility'])
                 self.input['baseline'] = [x + y for x, y in zip(self.input['baseline'], el['baseline'])]
@@ -98,9 +98,9 @@ class Aggregator(object):
         except:
             raise Exception('pods is not iterable')
 
-    def set_local_optimization_result(self, opt: LocalOptimizationResult):
+    def set_local_opt_result(self, opt: LocalOptimizationResult):
         if isinstance(opt, LocalOptimizationResult):
-            self.local_optimization_result = opt
+            self.local_opt_result = opt
         else:
             raise Exception('{} passed argument is not of type LocalOptimizationResult'.format(LocalOptimizationResult))
 
@@ -140,7 +140,7 @@ class Aggregator(object):
 
         self.solver.resolve(model_resolve_method, print_results, tee, pprint)
 
-        self.result['date'] = self.local_optimization_result.data['date']
+        self.result['date'] = self.local_opt_result.data['date']
         self.result['optimizations'] = self.solver.results
 
         if print_graphs:
@@ -177,7 +177,7 @@ class Aggregator(object):
 
         ax.plot(self.result['optimizations'][resolve_method]['F_max'], label='Optimized Flex UB', color='#ff7f0e')
         ax.plot(self.result['optimizations'][resolve_method]['F_min'], label='Optimized Flex LB', color='#1f77b4')
-        ax.plot(self.result['optimizations'][resolve_method]['baseline'], label='Baseline (' + resolve_method + ')', color='#bcbd22',
+        ax.plot(self.result['optimizations'][resolve_method]['baseline'], label='Baseline', color='#bcbd22',
                 linewidth=1)
 
         plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0.3)

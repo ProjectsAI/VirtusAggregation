@@ -35,7 +35,7 @@ def print_graph(plant, title=''):
 np.random.seed(10)
 
 scale_factor = 1
-date = '2020-11-15'
+date = '2020-11-18'
 
 pontlab1_test = np.load('Baseline/' + date + '.uvax.27.plants.1041.profile.baseline.npy')
 pontlab2_test = np.load('Baseline/' + date + '.uvax.27.plants.1042.profile.baseline.npy')
@@ -267,19 +267,19 @@ solver_method = ModelResolveMethod.MINIMIZE_AND_MAXIMIZE
 
 aggregator = Aggregator()
 
-n_p_pv1 = 5
+n_p_pv1 = 2
 n_p_pv2 = 0
-n_p_wind1 = 5
-n_p_wind2 = 0
-n_p_chp1 = 2
+n_p_wind1 = 4
+n_p_wind2 = 4
+n_p_chp1 = 0
 n_p_bess1 = 0
-n_p_bess2 = 10
+n_p_bess2 = 8
 n_p_pontlab1 = 0
 n_p_pontlab2 = 0
 n_p_load1 = 0
-n_p_load2 = 4
-n_p_load3 = 2
-n_p_load4 = 2
+n_p_load2 = 2
+n_p_load3 = 5
+n_p_load4 = 5
 
 n_p1 = 0
 n_p2 = 0

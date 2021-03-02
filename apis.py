@@ -69,7 +69,7 @@ def aggregate():
     r = {'data': None}
     local_opt_result = LocalOptimizationResult(**json.loads(content))
     aggregator = Aggregator()
-    aggregator.set_local_optimization_result(local_opt_result)
+    aggregator.set_local_opt_result(local_opt_result)
     result = aggregator.aggregate()
     r['data'] = result
     return jsonify(r)
